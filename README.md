@@ -1,0 +1,2 @@
+# BayesIK
+Bayesian inverse kinematics
