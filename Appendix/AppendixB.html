@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>AppendixB</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>AppendixB</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 <style type="text/css">
@@ -11800,7 +11802,7 @@ f(x) &= (x - 11)^2 + (x - 10)^2 \\
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Approach-2:--Bayesian">Approach 2:  Bayesian<a class="anchor-link" href="#Approach-2:--Bayesian">&#182;</a></h3><p>In contrast to the least-squares approach, which minimizes measurement error, <strong>the Bayesian approach maximizes model parameters' mean posterior probabilities</strong> given observed (noisy) data. A roughly equivalent interpretation is that the Bayesian approach maximize the probability of observing the given data. This is done by optimizing the parameters which characterize a stochastic system.  This latter interpretation is not completely correct but is easier to understand than posterior probability maximization, so is a useful starting point for considering why Bayesian and least-squares solutions may differ.</p>
+<h3 id="Approach-2:--Bayesian">Approach 2:  Bayesian<a class="anchor-link" href="#Approach-2:--Bayesian">&#182;</a></h3><p>In contrast to the least-squares approach, which minimizes measurement error, <strong>the Bayesian approach maximizes model parameters' mean posterior probabilities</strong> given observed (noisy) data. A roughly equivalent interpretation is that the Bayesian approach maximize the probability of observing the given data. This is done by optimizing the parameters which characterize a stochastic system.</p>
 <p>To implement Bayesian IK we start with the stochastic, graphical model of our measurements depicted below.</p>
 <p><img src="figs/bayesmodel_simple.png" width="300"></p>
 <p>In this model there are two stochastic variables: $x$ and $\epsilon$, where $x$ is the slider displacement we wish to estimate, and where $\boldsymbol{\epsilon}$ is measurement error. Once the numerical value of $x$ is known, then the true values of the deterministic variables ($\xM{1}$ and $\xM{2}$) are also known. Similarly, once the random measurement error values $\boldsymbol{\epsilon}$ are known, then the values of the (modeled) observed variables $\boldsymbol{q}$ are known. Here $\boldsymbol{q}$ is a generalized observation vector containing the values of all observed variables, in this case: $\xpM{1}$ and $\xpM{2}$.</p>
@@ -11942,10 +11944,10 @@ f(x) &= (x - 11)^2 + (x - 10)^2 \\
 
 
 
-<div id="0e4118c3-4f7c-438e-a428-bd8b662c7a59"></div>
+<div id="1c7c85ae-189a-4a6e-bd3d-a1b485cc35db"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#0e4118c3-4f7c-438e-a428-bd8b662c7a59');
+var element = $('#1c7c85ae-189a-4a6e-bd3d-a1b485cc35db');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -12749,10 +12751,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<div id="80666576-9975-4166-b7d0-9b5be2c9d91a"></div>
+<div id="0c680609-19f4-4404-ad66-0f6788019874"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#80666576-9975-4166-b7d0-9b5be2c9d91a');
+var element = $('#0c680609-19f4-4404-ad66-0f6788019874');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -13530,7 +13532,7 @@ if (IPython.notebook.kernel != null) {
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>There is now much greater overlap between the simulated and measured data, implying that there is a much greater probability of observing these data when $x$=10 than when $x$=8.</p>
-<p>Above we suggested that an easy way to understand Bayesian computation is: maximizing the probability of observing the data.  This probability can be expressed as: P( data | parameters );  the probability of observing the data given particular model parameters.  In reality Bayesian computation aims to maximize the complementary probability: P( parameters | data ), and since this is not a single values for each parameter, but actually a distribution for each parameter, the goal is to maximize the maximum value of each distribution. Bayes' Rule provides a computationally simple mapping between P( data | parameters ) and its compliment: P( parameters | data ), where the mapping depends only on the assumed (or calculated) prior distribution(s) (see Appendix A).</p>
+<p>Above we suggested that an easy way to understand Bayesian computation is: maximizing the probability of observing the data.  This probability can be expressed as: P( data | parameters );  the probability of observing the data given particular model parameters.  In reality Bayesian computation aims to maximize the complementary probability: P( parameters | data ), and the goal is to maximize the maximum value of the distribution for each parameter. Bayes' Rule provides a computationally simple mapping between P( data | parameters ) and its compliment: P( parameters | data ), where the mapping depends only on the assumed (or calculated) prior distribution(s) (see Appendix A).</p>
 <p>The computational details associated with this posterior distribution maximization are somewhat complex and difficult to demonstrate in just a few lines of code.  We shall instead turn to PyMC, where all probability computations occur under the surface.</p>
 <p>First let's translate our measurement model into PyMC.</p>
 
@@ -13835,10 +13837,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<div id="10f2fa41-1e12-4335-8564-f1714a2b5cc5"></div>
+<div id="db9dd332-9a8a-458a-a530-4b9a70ab8045"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#10f2fa41-1e12-4335-8564-f1714a2b5cc5');
+var element = $('#db9dd332-9a8a-458a-a530-4b9a70ab8045');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -14697,10 +14699,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<div id="c96504c0-b422-41bc-85b2-f9d7e88436ca"></div>
+<div id="d3340be1-5a66-4103-9eb4-0d4b0f11a0d6"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#c96504c0-b422-41bc-85b2-f9d7e88436ca');
+var element = $('#d3340be1-5a66-4103-9eb4-0d4b0f11a0d6');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -15522,10 +15524,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<div id="0e713f61-cb62-4922-99ab-184c3e9a3244"></div>
+<div id="0bcd5fd0-1076-41ae-9bf0-fc6a5a8e4fc8"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#0e713f61-cb62-4922-99ab-184c3e9a3244');
+var element = $('#0bcd5fd0-1076-41ae-9bf0-fc6a5a8e4fc8');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -16304,7 +16306,7 @@ if (IPython.notebook.kernel != null) {
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Clearly our assumptions regarding $\tau$ have affected our posterior distribution.  In fact, it has become clear that <strong>the least-squares solution is equivalent to the Bayesian solution under an assumption of infinite measurement precision</strong>.  That is, as the presumed measurement precision increases the Bayesian solution converges to $x$=10.5, with no uncertainty, just like the least-squares solution.</p>
 <p>This seems somewhat strange:  the least-squares solution has minimized measurement error, so how can that be equivalent to an assumption of no measurement error?  This apparent paradox is resolved by the opposite perspectives on measurements that the two approaches adopt.  The least-squares approach regards the measured data as hard, and minimizes an explicit function of those measurements.  Contrastingly, the Bayesian approach regards the measured data as soft -- just one manifestation of a continuum of plausible measurements.  Thus setting infinite precision forces the Bayesian approach to regard the data as hard, and consequently to assume zero variability in its estimate of $x$.</p>
-<p>This raises an important point:  what actual value of precision should we use?  Most kinematics recording manufacturers provide measurement accuracy values, so one option is to use those precision data. A second, more Bayesian option, is to regard precision itself as stochastic, and to then let Bayesian inference decide the most likely precision, based on the data.  This can be implemented as follows:</p>
+<p>This raises an important point:  what actual value of precision should we use?  Most motion capture manufacturers provide measurement accuracy values, so one option is to use those precision data. A second, more Bayesian option, is to regard precision itself as stochastic, and to then let Bayesian inference decide the most likely precision, based on the data.  This can be implemented as follows:</p>
 
 </div>
 </div>
@@ -16355,10 +16357,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<div id="6ea156ce-1e3c-423d-9705-28867c93084c"></div>
+<div id="2aca4909-049d-4dd1-a6e1-82b9f9f4a5d0"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#6ea156ce-1e3c-423d-9705-28867c93084c');
+var element = $('#2aca4909-049d-4dd1-a6e1-82b9f9f4a5d0');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -17159,7 +17161,7 @@ if (IPython.notebook.kernel != null) {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h3><p>The mechanical slider model and marker measurements discussed in this Appendix, while rudimentary, highlight a variety of important differences between the least-squares and Bayesian approaches to inverse kinematics (IK).  While the least-sqaures approach minimizes an explicit function of the measured data, the Bayesian approach instead maximizes the maximim a posteriori probabilities (MAP) of all stochastic variables, using Bayes' Rule to map from the prior to the posterior distributions based on the observed data. Consequenty, the Bayesian approach propogates measurement uncertainty to the IK solution, but the least-squares solution does not.  Therefore, and somewhat paradoxically, the Bayesian and least-squares approaches yield equivalent IK solutions only under an assumption of infinite measurement precision. Last, results above show that BIK can be sensitive to modeling assumptions, including which variables are stochastic and the prior distributions of each stochastic variable.</p>
+<h3 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h3><p>The mechanical slider model and marker measurements discussed in this Appendix, while rudimentary, highlight a variety of important differences between the least-squares and Bayesian approaches to inverse kinematics (IK).  While the least-sqaures approach minimizes an explicit function of the measured data, the Bayesian approach instead maximizes the maximim a posteriori probabilities (MAP) of all stochastic variables, using Bayes' Rule to map from the prior to the posterior distributions based on the observed data. Consequenty, the Bayesian approach propagates measurement uncertainty to the IK solution, but the least-squares solution does not.  Therefore, and somewhat paradoxically, the Bayesian and least-squares approaches yield equivalent IK solutions only under an assumption of infinite measurement precision. Last, results above show that BIK can be sensitive to modeling assumptions, including which variables are stochastic and the prior distributions of each stochastic variable.</p>
 
 </div>
 </div>
@@ -17167,8 +17169,4 @@ if (IPython.notebook.kernel != null) {
     </div>
   </div>
 </body>
-
- 
-
-
 </html>
