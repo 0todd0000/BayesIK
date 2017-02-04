@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>AppendixC</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>AppendixC</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 <style type="text/css">
@@ -11774,13 +11772,14 @@ $\newcommand{\rvector}[1]{\boldsymbol{r}_{\mathrm{#1}}}$</p>
 \rvector{M2} &= \rvector{A} + \boldsymbol{R} \ \sM{2}
 \end{align}<p>where $\boldsymbol{R}$ is the rotation matrix:</p>
 \begin{equation}
-\boldsymbol{R} = \mymatrix{\cos\theta}{-\sin\theta}{\sin\theta}{\cos\theta}
+\boldsymbol{R} = 
+\left[ \begin{array}{c}\cos\theta&-\sin\theta\\\sin\theta&\cos\theta\end{array} \right]
 \end{equation}<h3 id="Inverse-kinematics-(IK)-problem">Inverse kinematics (IK) problem<a class="anchor-link" href="#Inverse-kinematics-(IK)-problem">&#182;</a></h3><p>Imagine that we have measured the following marker positions:</p>
 \begin{align}
 \rvector{M1}' &= \myvector{33.51}{12.11}\\ \\
 \rvector{M2}' &= \myvector{42.63}{16.18}
 \end{align}<p>The IK problem is to estimate $y$ and $\theta$ given these measurements.</p>
-<p>For argument's sake let's say we also happen to know that the true values of the unknown variables are: $y$ = 0 and $\theta$ = 20 deg. In this case the true global marker positions are:</p>
+<p>To help us create a preliminary stochastic model, let’s imagine that we also happen to know that the true values of the unknown variables are: $y$ = 0 and $\theta$ = 20 deg. In this case the true global marker positions are:</p>
 \begin{align}
 \rvector{M1} &= \myvector{32.89}{11.97}\\ \\
 \rvector{M2} &= \myvector{42.29}{15.39}
@@ -11863,10 +11862,10 @@ $\newcommand{\rvector}[1]{\boldsymbol{r}_{\mathrm{#1}}}$</p>
 
 
 
-<div id="d155ce2d-8016-44a2-bb80-9431ca783779"></div>
+<div id="d9b65902-1243-4cfa-bfc5-ed0d398f11b9"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#d155ce2d-8016-44a2-bb80-9431ca783779');
+var element = $('#d9b65902-1243-4cfa-bfc5-ed0d398f11b9');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -12794,10 +12793,10 @@ f(\boldsymbol{x}) =
 
 
 
-<div id="36fda628-6e98-463c-aac6-6d7709d575ad"></div>
+<div id="946c5cd1-1e45-432c-9d80-8465b0a49c14"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#36fda628-6e98-463c-aac6-6d7709d575ad');
+var element = $('#946c5cd1-1e45-432c-9d80-8465b0a49c14');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -13695,9 +13694,9 @@ if (IPython.notebook.kernel != null) {
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[ 33.00949103  12.11677202  42.8217919   15.4843805 ]
-[ 32.99813435  11.93966376  42.21371549  15.42511209]
-[ 33.46226402  11.84346186  42.38949442  15.52065574]
+<pre>[ 32.91421035  11.84693813  42.17217743  15.10606366]
+[ 32.91913209  11.99631412  42.1501105   15.23180303]
+[ 32.59669012  11.83703329  42.06128384  15.39625535]
 </pre>
 </div>
 </div>
@@ -13741,11 +13740,11 @@ if (IPython.notebook.kernel != null) {
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[ 32.8892442   11.97063936  42.28616219  15.39088699]
-[ 32.88924146  11.9706903   42.28612982  15.39091025]
-[ 32.88920883  11.97068703  42.28614886  15.39094526]
-[ 32.88920168  11.97074735  42.286205    15.39091515]
-[ 32.88915963  11.9706594   42.28621941  15.39090345]
+<pre>[ 32.88930738  11.97070089  42.28616529  15.39088051]
+[ 32.88924513  11.97071193  42.28620278  15.39090122]
+[ 32.88924073  11.97074603  42.28617238  15.39091543]
+[ 32.88924216  11.97072185  42.28617216  15.39087819]
+[ 32.88920623  11.97069205  42.28615135  15.39093446]
 </pre>
 </div>
 </div>
@@ -13802,11 +13801,11 @@ if (IPython.notebook.kernel != null) {
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre> [-----------------100%-----------------] 40000 of 40000 complete in 14.9 sec
+<pre> [-----------------100%-----------------] 40000 of 40000 complete in 14.8 sec
 
 Bayesian estimates:
-   y     = 1.077
-   theta = 19.020
+   y     = 1.137
+   theta = 18.936
 </pre>
 </div>
 </div>
@@ -13994,25 +13993,25 @@ Bayesian estimates:
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Iteration 1 of 10...
-   y = 0.031,  theta = 5.748
+   y = 0.119,  theta = 5.604
 Iteration 2 of 10...
-   y = 0.142,  theta = 5.556
+   y = 0.080,  theta = 5.665
 Iteration 3 of 10...
-   y = 0.149,  theta = 5.552
+   y = 0.123,  theta = 5.592
 Iteration 4 of 10...
-   y = 0.061,  theta = 5.680
+   y = 0.171,  theta = 5.508
 Iteration 5 of 10...
-   y = -0.007,  theta = 5.780
+   y = 0.072,  theta = 5.665
 Iteration 6 of 10...
-   y = 0.070,  theta = 5.675
+   y = 0.098,  theta = 5.631
 Iteration 7 of 10...
-   y = 0.075,  theta = 5.684
+   y = 0.073,  theta = 5.680
 Iteration 8 of 10...
-   y = 0.052,  theta = 5.700
+   y = 0.065,  theta = 5.677
 Iteration 9 of 10...
-   y = 0.027,  theta = 5.723
+   y = 0.083,  theta = 5.658
 Iteration 10 of 10...
-   y = 0.095,  theta = 5.645
+   y = 0.018,  theta = 5.759
 </pre>
 </div>
 </div>
@@ -14059,7 +14058,7 @@ Iteration 10 of 10...
 <pre>Average absolute error (least-squares):
    y: 1.587,  theta: 2.136
 Average absolute error (Bayesian):
-   y: 0.170,  theta: 0.674
+   y: 0.190,  theta: 0.644
 </pre>
 </div>
 </div>
@@ -14074,7 +14073,7 @@ Average absolute error (Bayesian):
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>We can see that, on average, the Bayesian approach produces smaller errors for both $y$ and $\theta$.</p>
-<p>However, you may have noticed that our calculations above have cheated a bit by using the true values of $y$ and $\theta$ as the algorithmic starting points.  Thus the results above suggest only that the Bayesian approach performs better than the least-squares approach when both start from the known true values of $y$ and $\theta$. In real IK applications the true values of $y$ and $\theta$ are of course unknown.  The main manuscript implements much more ignorant starting points to avoid this potential source of bias.</p>
+<p>However, you may have noticed that our calculations above have cheated a bit by using the true values of $y$ and $\theta$ as the algorithmic starting points.  Thus the results above suggest only that the Bayesian approach performs better than the least-squares approach when both start from the known true values of $y$ and $\theta$. In real IK applications the true values of $y$ and $\theta$ are of course unknown.  Let’s therefore remove this potential source of bias by starting our Bayesian calculations from the LS solution;   if the Bayesian algorithm tends to find better estimates we can be reasonably confident that it would also find better estimates in real laboratory situations where the true parameters are unknown but the LS solution is readily calculatable.</p>
 <p>Let's also check how the least-squares and Bayesian approaches compare on a case-by-case basis.</p>
 
 </div>
@@ -14099,16 +14098,16 @@ Average absolute error (Bayesian):
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[[ 0.538 -0.736]
- [ 0.358  0.712]
- [ 0.394  1.044]
- [ 0.61   0.265]
- [ 1.632  2.076]
- [ 1.218  1.351]
- [ 0.097 -0.484]
- [ 2.849  2.944]
- [ 3.436  3.765]
- [ 3.045  3.681]]
+<pre>[[ 0.449 -0.593]
+ [ 0.421  0.603]
+ [ 0.42   1.004]
+ [ 0.501  0.437]
+ [ 1.553  2.191]
+ [ 1.191  1.395]
+ [ 0.099 -0.481]
+ [ 2.836  2.966]
+ [ 3.381  3.83 ]
+ [ 3.123  3.567]]
 </pre>
 </div>
 </div>
@@ -14132,7 +14131,7 @@ Average absolute error (Bayesian):
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h1><p>This Appendix shows that Bayesian and least-squares inverse kinematics (IK) estimates can diverge even for simple planar rotations. The results suggest that Bayesian IK performs better in general than least-sqaures IK. The main manuscript explains why:  generally, the output from a stochastic model <em>probabilistically</em> matches noisy data better when using Bayesian-estimated model parameters than when using least-squares estimates.</p>
+<h1 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h1><p>This Appendix has shown that Bayesian and least-squares inverse kinematics (IK) estimates can diverge even for simple planar rotations. The results suggest that Bayesian IK performs better in general than least-sqaures IK. The next and final Appendix describes the minimal conditions under which this is generally true.</p>
 
 </div>
 </div>
@@ -14140,4 +14139,8 @@ Average absolute error (Bayesian):
     </div>
   </div>
 </body>
+
+ 
+
+
 </html>
