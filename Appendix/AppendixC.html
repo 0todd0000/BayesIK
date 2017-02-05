@@ -11862,10 +11862,10 @@ $\newcommand{\rvector}[1]{\boldsymbol{r}_{\mathrm{#1}}}$</p>
 
 
 
-<div id="d9b65902-1243-4cfa-bfc5-ed0d398f11b9"></div>
+<div id="fc875778-cf2b-4426-b94f-0a194c1b2971"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#d9b65902-1243-4cfa-bfc5-ed0d398f11b9');
+var element = $('#fc875778-cf2b-4426-b94f-0a194c1b2971');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -12793,10 +12793,10 @@ f(\boldsymbol{x}) =
 
 
 
-<div id="946c5cd1-1e45-432c-9d80-8465b0a49c14"></div>
+<div id="65989af1-cf79-40d2-af1c-2c22c3e5a0dc"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#946c5cd1-1e45-432c-9d80-8465b0a49c14');
+var element = $('#65989af1-cf79-40d2-af1c-2c22c3e5a0dc');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -13694,9 +13694,9 @@ if (IPython.notebook.kernel != null) {
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[ 32.91421035  11.84693813  42.17217743  15.10606366]
-[ 32.91913209  11.99631412  42.1501105   15.23180303]
-[ 32.59669012  11.83703329  42.06128384  15.39625535]
+<pre>[ 32.97922836  12.20220175  42.6282548   15.59990796]
+[ 33.23593513  11.70355088  42.13365699  15.48794652]
+[ 33.2655294   12.07700177  42.7866023   15.17220655]
 </pre>
 </div>
 </div>
@@ -13740,11 +13740,11 @@ if (IPython.notebook.kernel != null) {
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[ 32.88930738  11.97070089  42.28616529  15.39088051]
-[ 32.88924513  11.97071193  42.28620278  15.39090122]
-[ 32.88924073  11.97074603  42.28617238  15.39091543]
-[ 32.88924216  11.97072185  42.28617216  15.39087819]
-[ 32.88920623  11.97069205  42.28615135  15.39093446]
+<pre>[ 32.8892869   11.97069217  42.28619728  15.39095533]
+[ 32.88925197  11.97064551  42.28618147  15.39093762]
+[ 32.88926862  11.97070863  42.28613359  15.39092263]
+[ 32.88922803  11.97071844  42.28609108  15.39090715]
+[ 32.88922915  11.97071252  42.28612585  15.3909523 ]
 </pre>
 </div>
 </div>
@@ -13801,11 +13801,11 @@ if (IPython.notebook.kernel != null) {
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre> [-----------------100%-----------------] 40000 of 40000 complete in 14.8 sec
+<pre> [-----------------100%-----------------] 40000 of 40000 complete in 12.7 sec
 
 Bayesian estimates:
-   y     = 1.137
-   theta = 18.936
+   y     = 1.080
+   theta = 19.021
 </pre>
 </div>
 </div>
@@ -13995,23 +13995,23 @@ Bayesian estimates:
 <pre>Iteration 1 of 10...
    y = 0.119,  theta = 5.604
 Iteration 2 of 10...
-   y = 0.080,  theta = 5.665
+   y = 0.033,  theta = 5.727
 Iteration 3 of 10...
-   y = 0.123,  theta = 5.592
+   y = 0.078,  theta = 5.650
 Iteration 4 of 10...
-   y = 0.171,  theta = 5.508
+   y = 0.066,  theta = 5.684
 Iteration 5 of 10...
-   y = 0.072,  theta = 5.665
+   y = 0.001,  theta = 5.781
 Iteration 6 of 10...
-   y = 0.098,  theta = 5.631
+   y = 0.073,  theta = 5.669
 Iteration 7 of 10...
-   y = 0.073,  theta = 5.680
+   y = 0.116,  theta = 5.610
 Iteration 8 of 10...
-   y = 0.065,  theta = 5.677
+   y = 0.047,  theta = 5.699
 Iteration 9 of 10...
-   y = 0.083,  theta = 5.658
+   y = 0.117,  theta = 5.605
 Iteration 10 of 10...
-   y = 0.018,  theta = 5.759
+   y = 0.118,  theta = 5.609
 </pre>
 </div>
 </div>
@@ -14058,7 +14058,7 @@ Iteration 10 of 10...
 <pre>Average absolute error (least-squares):
    y: 1.587,  theta: 2.136
 Average absolute error (Bayesian):
-   y: 0.190,  theta: 0.644
+   y: 0.177,  theta: 0.664
 </pre>
 </div>
 </div>
@@ -14073,8 +14073,7 @@ Average absolute error (Bayesian):
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>We can see that, on average, the Bayesian approach produces smaller errors for both $y$ and $\theta$.</p>
-<p>However, you may have noticed that our calculations above have cheated a bit by using the true values of $y$ and $\theta$ as the algorithmic starting points.  Thus the results above suggest only that the Bayesian approach performs better than the least-squares approach when both start from the known true values of $y$ and $\theta$. In real IK applications the true values of $y$ and $\theta$ are of course unknown.  Let’s therefore remove this potential source of bias by starting our Bayesian calculations from the LS solution;   if the Bayesian algorithm tends to find better estimates we can be reasonably confident that it would also find better estimates in real laboratory situations where the true parameters are unknown but the LS solution is readily calculatable.</p>
-<p>Let's also check how the least-squares and Bayesian approaches compare on a case-by-case basis.</p>
+<p>However, you may have noticed that our calculations above have cheated a bit by using the true values of $y$ and $\theta$ as the algorithmic starting points.  This approach is obviously not possible in the laboratory where the true IK solution is unknown.  Let’s therefore remove this potential source of bias by starting our Bayesian calculations from the LS solution, which is readily computable in the laboratory.  (Note that only the second line in the code below "x = solution_ls(q_obs)" is different from the code above.)</p>
 
 </div>
 </div>
@@ -14082,6 +14081,134 @@ Average absolute error (Bayesian):
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">solution_bayesian</span><span class="p">(</span><span class="n">q_obs</span><span class="p">):</span>
+    <span class="n">x0</span>      <span class="o">=</span> <span class="n">solution_ls</span><span class="p">(</span><span class="n">q_obs</span><span class="p">)</span>  <span class="c1">#initial (y, theta) guess</span>
+    <span class="n">tau</span>     <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;tau&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">noise_amp</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">y</span>       <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">y_true</span><span class="p">)</span>
+    <span class="n">theta</span>   <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">&quot;theta&quot;</span><span class="p">,</span> <span class="n">radians</span><span class="p">(</span><span class="o">-</span><span class="mi">45</span><span class="p">),</span> <span class="n">radians</span><span class="p">(</span><span class="mi">45</span><span class="p">))</span>
+
+    <span class="nd">@pymc.deterministic</span>
+    <span class="k">def</span> <span class="nf">observations_model</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">):</span>
+        <span class="n">rM1</span><span class="p">,</span><span class="n">rM2</span> <span class="o">=</span> <span class="n">get_positions</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+        <span class="n">q</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">rM1</span><span class="p">,</span> <span class="n">rM2</span><span class="p">])</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">q</span>
+    <span class="n">q_model</span>   <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">&quot;q&quot;</span><span class="p">,</span> <span class="n">observations_model</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">q_obs</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">mcmc</span>      <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">MCMC</span><span class="p">([</span><span class="n">q_model</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">tau</span><span class="p">])</span>
+    <span class="n">mcmc</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">40000</span><span class="p">,</span> <span class="mi">20000</span><span class="p">,</span> <span class="n">progress_bar</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">Y</span>         <span class="o">=</span> <span class="n">mcmc</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)[:]</span>
+    <span class="n">THETA</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span> <span class="n">mcmc</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s1">&#39;theta&#39;</span><span class="p">)[:]</span> <span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">Y</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">THETA</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+<span class="n">RESULTS_B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nIterations</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">q_obs</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Q_obs</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Iteration </span><span class="si">%d</span><span class="s1"> of </span><span class="si">%d</span><span class="s1">...&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nIterations</span><span class="p">))</span>
+    <span class="n">y</span><span class="p">,</span><span class="n">theta</span> <span class="o">=</span> <span class="n">solution_bayesian</span><span class="p">(</span><span class="n">Q_obs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">RESULTS_B</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">theta</span><span class="p">]</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;   y = </span><span class="si">%.3f</span><span class="s1">,  theta = </span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">theta</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Iteration 1 of 10...
+   y = 0.031,  theta = 5.742
+Iteration 2 of 10...
+   y = 0.081,  theta = 5.664
+Iteration 3 of 10...
+   y = 0.073,  theta = 5.681
+Iteration 4 of 10...
+   y = 0.142,  theta = 5.551
+Iteration 5 of 10...
+   y = 0.103,  theta = 5.620
+Iteration 6 of 10...
+   y = 0.104,  theta = 5.620
+Iteration 7 of 10...
+   y = 0.062,  theta = 5.675
+Iteration 8 of 10...
+   y = -0.027,  theta = 5.816
+Iteration 9 of 10...
+   y = -0.042,  theta = 5.845
+Iteration 10 of 10...
+   y = 0.136,  theta = 5.575
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's re-summarize the IK error for the Bayesian and LS approaches:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython2"><pre><span></span><span class="n">x_true</span>   <span class="o">=</span> <span class="p">[</span><span class="n">y_true</span><span class="p">,</span> <span class="n">degrees</span><span class="p">(</span><span class="n">theta_true</span><span class="p">)]</span>
+<span class="n">error_LS</span> <span class="o">=</span> <span class="n">RESULTS_LS</span> <span class="o">-</span> <span class="n">x_true</span>
+<span class="n">error_B</span>  <span class="o">=</span> <span class="n">RESULTS_B</span> <span class="o">-</span> <span class="n">x_true</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Average absolute error (least-squares):&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;   y: </span><span class="si">%.3f</span><span class="s1">,  theta: </span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span><span class="k">tuple</span>( np.abs(error_LS).mean(axis=0) ) )
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;Average absolute error (Bayesian):&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;   y: </span><span class="si">%.3f</span><span class="s1">,  theta: </span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span><span class="k">tuple</span>( np.abs(error_B).mean(axis=0) ) )
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Average absolute error (least-squares):
+   y: 1.587,  theta: 2.136
+Average absolute error (Bayesian):
+   y: 0.166,  theta: 0.679
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The Bayesian IK solutions are still considerably better than the LS solutions.  For completion let's also check how the least-squares and Bayesian approaches compare on a case-by-case basis for each of the ten datasets.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">error_difference</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">error_LS</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">error_B</span><span class="p">)</span>
@@ -14098,16 +14225,16 @@ Average absolute error (Bayesian):
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[[ 0.449 -0.593]
- [ 0.421  0.603]
- [ 0.42   1.004]
- [ 0.501  0.437]
- [ 1.553  2.191]
- [ 1.191  1.395]
- [ 0.099 -0.481]
- [ 2.836  2.966]
- [ 3.381  3.83 ]
- [ 3.123  3.567]]
+<pre>[[ 0.537 -0.73 ]
+ [ 0.42   0.605]
+ [ 0.469  0.915]
+ [ 0.53   0.394]
+ [ 1.522  2.236]
+ [ 1.185  1.406]
+ [ 0.11  -0.475]
+ [ 2.929  2.828]
+ [ 3.505  3.643]
+ [ 3.005  3.751]]
 </pre>
 </div>
 </div>
@@ -14121,7 +14248,7 @@ Average absolute error (Bayesian):
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Positive values indicate that the least-squares solution had greater error and negative values indicate the opposite.  This shows that the Bayesian estimates for $y$ were better in all ten cases, and that the Bayesian estimates for $\theta$ were better in 8 of 10 cases.</p>
+<p>Here positive values indicate that the LS solution had greater error and negative values indicate the opposite.  These results indicate that the Bayesian estimates for $y$ were better in all ten cases, and that the Bayesian estimates for $\theta$ were better in 8 of 10 cases.</p>
 
 </div>
 </div>
@@ -14131,7 +14258,9 @@ Average absolute error (Bayesian):
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h1><p>This Appendix has shown that Bayesian and least-squares inverse kinematics (IK) estimates can diverge even for simple planar rotations. The results suggest that Bayesian IK performs better in general than least-sqaures IK. The next and final Appendix describes the minimal conditions under which this is generally true.</p>
+<h1 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h1><p>This Appendix has shown that Bayesian and least-squares (LS) inverse kinematics (IK) estimates can diverge even for simple planar rotations. The results suggest that Bayesian IK estimates are better in general than LS-IK estimates, even when the Bayesian IK estimates algorithm commences from the (erroneous) LS solution. If this assertion is true it would imply that Bayesian IK is also likely to find better IK estimates in real laboratory situations where LS solutions are readily calculatable.</p>
+<p>The primary factors accounting for the divergence between Bayesian and LS estimates are: (a) nonlinearity and (b) signal-to-noise ratio (SNR). In nonlinear problems (like the general IK problem) Bayesian and LS methods perform approximately equivalently only when the SNR is high;  when the SNR becomes moderate-to-low the Bayesian estimates become better (Elster &amp; Wübbeler 2016). The role of SNR in IK calculations is addressed further in the main manuscript.</p>
+<h3 id="References">References<a class="anchor-link" href="#References">&#182;</a></h3><p>Elster C, Wübbeler G (2016). Bayesian regression versus application of least squares—an example. <em>Metrologia</em> <strong>5</strong>, 10–16. <a href="http://doi.org/10.1088/0026-1394/53/1/S10">http://doi.org/10.1088/0026-1394/53/1/S10</a></p>
 
 </div>
 </div>
