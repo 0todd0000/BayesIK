@@ -11789,7 +11789,7 @@ $\newcommand{\rvector}[1]{\boldsymbol{r}_{\mathrm{#1}}}$</p>
 <div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="APPENDIX-D:--Bayesian-and-least-squares-results-divergence">APPENDIX D:  Bayesian and least-squares results divergence<a class="anchor-link" href="#APPENDIX-D:--Bayesian-and-least-squares-results-divergence">&#182;</a></h1><p>This Appendix describes a minimal inverse kinematics model for which Bayesian and least-sqaures results diverge.</p>
 <h3 id="Model">Model<a class="anchor-link" href="#Model">&#182;</a></h3><p>The planar mechanism depicted below has two degrees of freedom (DOF): one translational and one rotational. The first segment moves to a position $y$ and the second segment rotates about point A to an angle $\theta$. Two markers (M1 and M2) are rigidly fixed to the rotating segment and have constant local positions:  $\sM{1} = \myvector{35}{0}$ and $\sM{2} = \myvector{45}{0}$.</p>
-<p><img src="figs/C_2dof_model.png" width="450"></p>
+<p><img src="figs/rotating_slider.png" width="450"></p>
 <p>The three points' true global positions are:</p>
 <p>\begin{align}
 \rvector{A} &amp;= \myvector{0}{y}\\ \\
@@ -11894,10 +11894,10 @@ $\newcommand{\rvector}[1]{\boldsymbol{r}_{\mathrm{#1}}}$</p>
 
 
 
-<div id="a9e64bd0-3f97-41e3-b212-c9593f81d814"></div>
+<div id="0666c437-62fa-44df-a68a-da1e5c20365f"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#a9e64bd0-3f97-41e3-b212-c9593f81d814');
+var element = $('#0666c437-62fa-44df-a68a-da1e5c20365f');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -12862,10 +12862,10 @@ f(\boldsymbol{x}) =
 
 
 
-<div id="bf3b0f98-679d-4d48-ab2c-cf532cecca67"></div>
+<div id="c1ab13f3-ebce-4e3f-aed4-0f6f753a12fe"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#bf3b0f98-679d-4d48-ab2c-cf532cecca67');
+var element = $('#c1ab13f3-ebce-4e3f-aed4-0f6f753a12fe');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -13720,7 +13720,7 @@ if (IPython.notebook.kernel != null) {
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="Bayesian-approach">Bayesian approach<a class="anchor-link" href="#Bayesian-approach">&#182;</a></h1><p>The figure below depicts a stochastic forward-kinematics model for this system.  Once the numerical values of $y$ and $\theta$ are known we know the values of our deterministic variables $\rvector{M1}$ and $\rvector{M2}$.  Similarly, once the numerical value of our measurement error $\epsilon$ is known we will also know the value of our generalized measurement vector $\boldsymbol{q}$, where $\boldsymbol{q}$ contains all four measured coordinates from $\rvector{M1}'$ and $\rvector{M2}'$. Let's implement this model in PyMC.</p>
-<p><img src="figs/C_bayesnet.png" width="300"></p>
+<p><img src="figs/bikmodel2.png" width="300"></p>
 
 </div>
 </div>

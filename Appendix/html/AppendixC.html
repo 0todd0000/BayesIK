@@ -11789,7 +11789,7 @@ $\newcommand{\xpM}[1]{x'_{\mathrm{M#1}}}$</p>
 <div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="APPENDIX-C:--Bayesian-inverse-kinematics-basics">APPENDIX C:  Bayesian inverse kinematics basics<a class="anchor-link" href="#APPENDIX-C:--Bayesian-inverse-kinematics-basics">&#182;</a></h1><p>This Appendix describes a simple Bayesian inverse kinematics (IK) model to introduce the computational details of the main manuscript's Bayesian IK model.</p>
 <p>Consider the slider mechanism pictured below.  This mechanism consists of a single rigid slider which moves to a global position $x$, and to which two markers ("M1" and "M2") are rigidly fixed.  Let's assume that we know that the local marker positions are: $\sM{1}$ = 35 mm and $\sM{2}$ = 45 mm.</p>
-<p><img src="figs/B_1dof_model.png" width="500"></p>
+<p><img src="figs/slider.png" width="400"></p>
 <p>Let's also assume that we have imperfectly measured the global marker positions ($\xpM{1}$ and $\xpM{2}$) as 46.0 and 55.0 mm, respectively. The IK problem is to find the slider position $x$ given the marker measurements $\xpM{1}$ and $\xpM{2}$.</p>
 
 </div>
@@ -11830,7 +11830,7 @@ x &amp;= \frac{42}{4}
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Approach-2:--Bayesian">Approach 2:  Bayesian<a class="anchor-link" href="#Approach-2:--Bayesian">&#182;</a></h3><p>In contrast to the least-squares (LS) approach, which minimizes measurement error, <strong>the Bayesian approach maximizes model parameters' mean posterior probabilities</strong> given observed (noisy) data. A roughly equivalent interpretation is that the Bayesian approach maximizes the probability of observing the given data. This is done by optimizing the parameters which characterize a stochastic system.</p>
 <p>To implement Bayesian IK we start with a model of our measurements as depicted below.</p>
-<p><img src="figs/B_bayesnet.png" width="300"></p>
+<p><img src="figs/bikmodel1.png" width="300"></p>
 <p>In this model there are two stochastic variables: $x$ and $\epsilon$, where $x$ is the slider displacement we wish to estimate, and where $\boldsymbol{\epsilon}$ is measurement error. Once the numerical value of $x$ is known, then the true values of the deterministic variables ($\xM{1}$ and $\xM{2}$) are also known. Similarly, once the random measurement error values $\boldsymbol{\epsilon}$ are known, then the values of the (modeled) observed variables $\boldsymbol{q}$ are known. Here $\boldsymbol{q}$ is a generalized observation vector containing the values of all observed variables, in this case: $\xpM{1}$ and $\xpM{2}$.</p>
 <p>Let's start to implement this model in Python by defining known values:  the true local positions and the observed measurment values.</p>
 
@@ -11976,10 +11976,10 @@ x &amp;= \frac{42}{4}
 
 
 
-<div id="3371230e-a012-4ed1-bed1-98e33888922a"></div>
+<div id="b5cc3d32-c4a5-431d-acc1-b76743c09f70"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#3371230e-a012-4ed1-bed1-98e33888922a');
+var element = $('#b5cc3d32-c4a5-431d-acc1-b76743c09f70');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -12806,10 +12806,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<div id="217e176c-e1c2-4782-b1bb-df24f50e5798"></div>
+<div id="7176c968-76cc-4db0-8b85-ca9cc8687215"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#217e176c-e1c2-4782-b1bb-df24f50e5798');
+var element = $('#7176c968-76cc-4db0-8b85-ca9cc8687215');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -13926,10 +13926,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<div id="247853e3-e4c3-4c99-aa8f-a1e03ee19076"></div>
+<div id="cc4620ab-4a72-4126-9aa4-369b53162d83"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#247853e3-e4c3-4c99-aa8f-a1e03ee19076');
+var element = $('#cc4620ab-4a72-4126-9aa4-369b53162d83');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -14818,10 +14818,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<div id="29d15236-e3d1-4c53-977f-8ac8fb3cf15c"></div>
+<div id="8d100674-ce94-44da-a020-26e874088461"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#29d15236-e3d1-4c53-977f-8ac8fb3cf15c');
+var element = $('#8d100674-ce94-44da-a020-26e874088461');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -15670,10 +15670,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<div id="092e4858-72af-4e9f-ae74-a0f8058597cd"></div>
+<div id="ac25e74c-3952-4487-b152-1b8af8cddf3d"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#092e4858-72af-4e9f-ae74-a0f8058597cd');
+var element = $('#ac25e74c-3952-4487-b152-1b8af8cddf3d');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -16530,10 +16530,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<div id="512d8675-22de-4f49-93de-d5efbbbd6141"></div>
+<div id="3b8529a9-679d-46db-bdcc-650a17c8c820"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#512d8675-22de-4f49-93de-d5efbbbd6141');
+var element = $('#3b8529a9-679d-46db-bdcc-650a17c8c820');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
