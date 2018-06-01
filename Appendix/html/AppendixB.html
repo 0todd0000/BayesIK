@@ -11787,7 +11787,9 @@ $\newcommand{\xpM}[1]{x'_{\mathrm{M#1}}}$</p>
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="APPENDIX-B:--Bayesian-vs.-least-squares-estimates-of-population-means">APPENDIX B:  Bayesian vs. least-squares estimates of population means<a class="anchor-link" href="#APPENDIX-B:--Bayesian-vs.-least-squares-estimates-of-population-means">&#182;</a></h1><p>This Appendix describes two Bayesian approaches to population mean estimation and then compares results to the least-squares solution (i.e. the sample mean). Let's start by drawing a random sample from the standard normal distribution, for which the true population mean and standard deviation (SD) are 0 and 1, respectively:</p>
+<h1 id="APPENDIX-B:--Bayesian-vs.-least-squares-estimates-of-population-means">APPENDIX B:  Bayesian vs. least-squares estimates of population means<a class="anchor-link" href="#APPENDIX-B:--Bayesian-vs.-least-squares-estimates-of-population-means">&#182;</a></h1><p>This Appendix compares Bayesian to least-squares (LS) estimates of population means, where the LS estimate is simply the sample mean (or arithmetic mean). This Appendix aims to demonstrate that even rudimentary LS concepts like the sample mean can be interpreted somewhat differently when regarding data from a Bayesian perspective.</p>
+<p>Below two Bayesian approaches to population mean estimation are described, and these results are then subsequently compared to the LS mean.</p>
+<p>Let's start by drawing a random sample from the standard normal distribution, for which the true population mean and standard deviation (SD) are 0 and 1, respectively:</p>
 
 </div>
 </div>
@@ -11844,7 +11846,7 @@ $\newcommand{\xpM}[1]{x'_{\mathrm{M#1}}}$</p>
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Approach-1:-Least-squares">Approach 1: Least-squares<a class="anchor-link" href="#Approach-1:-Least-squares">&#182;</a></h2><p>The least squares (LS) solution minimizes the following function:</p>
 <p>\begin{equation}
-f(x)  = \sum (x - y_i)^2
+f(x)  = \sum (y_i - x)^2
 \end{equation}</p>
 <p>where $x$ is the estimate of the population mean, and $y_i$ are the individual sample observations. The value of $x$ which minimizes $f(x)$ is the sample mean:</p>
 
@@ -11889,7 +11891,7 @@ f(x)  = \sum (x - y_i)^2
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Note that the sample mean is not zero, even through the true population mean is zero.  For the sample mean to converge precisely to the population mean, one would generally have to draw an infinitely large sample, or sample the entire population.</p>
+<p>Note that the sample mean is not zero, even through the true population mean is zero.  For the sample mean to converge precisely to the true population mean, one would generally have to draw an infinitely large sample, or sample the entire population.</p>
 
 </div>
 </div>
@@ -11916,7 +11918,7 @@ f(x)  = \sum (x - y_i)^2
 
 <span class="c1">#(2) Conduct inference:</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Model</span><span class="p">([</span><span class="n">data_model</span><span class="p">,</span> <span class="n">x</span><span class="p">])</span>    <span class="c1">#full model containing data model and all stochastic variables</span>
-<span class="n">mcmc</span>  <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">MCMC</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>               <span class="c1">#MCMC sampler</span>
+<span class="n">mcmc</span>  <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">MCMC</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>               <span class="c1">#Markov Chain Monte Carlo sampler</span>
 <span class="n">mcmc</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">iter</span><span class="o">=</span><span class="mi">11000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>     <span class="c1">#MC sampling</span>
 <span class="n">post</span>  <span class="o">=</span> <span class="n">mcmc</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)[:]</span>             <span class="c1">#posterior distribution for the population mean</span>
 <span class="n">bmean</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>                    <span class="c1">#Bayesian estimate of the population mean</span>
@@ -11954,7 +11956,7 @@ Bayesian estimate of the population mean (known variance):
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Note that the Bayesian estimate of the population mean is closer to its true value of zero.</p>
+<p>Note that the Bayesian estimate of the population mean is closer to its true value of zero than was the LS estimate. Let's consider each step of the Bayesian estimation procedure outlined in the code above.</p>
 <p>In order to conduct Bayesian inference regarding experimental data, a model of those data is required. The first step is to create a prior distribution for each stochastic variable:</p>
 
 </div>
@@ -12001,7 +12003,7 @@ Bayesian estimate of the population mean (known variance):
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>This command implies that we believe that our data sample comes from a normal distribution with an unknown population mean of x and a known precision of tau=1. The "observed=True" and "value=y" keyword arguments specify that the values in y were observed. In other words, based on the values y we want to find the most likely value for x, or more generally the posterior distribution for x given y.</p>
-<p>Now that we have the model we can conduct inference, and the MCMC-related inference commands above follow from Appendix A so are not discussed further here. Following inference, it can be informative to visualize the prior and the posterior distributions:</p>
+<p>Once we have the model we can conduct inference, and the Markov Chain Monte Carlo (MCMC)-related inference commands above follow from Appendix A so are not discussed further here. Following inference, it can be informative to visualize the prior and the posterior distributions:</p>
 
 </div>
 </div>
@@ -12036,10 +12038,10 @@ Bayesian estimate of the population mean (known variance):
 
 
 
-<div id="18a8fcc4-9b30-49a7-8bf9-ef2184470ef3"></div>
+<div id="c95e6fa0-0086-43a3-9c6b-6b3729cb7e02"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#18a8fcc4-9b30-49a7-8bf9-ef2184470ef3');
+var element = $('#c95e6fa0-0086-43a3-9c6b-6b3729cb7e02');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -12844,7 +12846,7 @@ if (IPython.notebook.kernel != null) {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Approach-3:-Bayesian-(unknown-variance)">Approach 3: Bayesian (unknown variance)<a class="anchor-link" href="#Approach-3:-Bayesian-(unknown-variance)">&#182;</a></h2><p>In order to model unknown variance we just need to change the precision variable (tau) into a stochastic variable, then ensure that tau is included int the full pymc model like this:</p>
+<h2 id="Approach-3:-Bayesian-(unknown-variance)">Approach 3: Bayesian (unknown variance)<a class="anchor-link" href="#Approach-3:-Bayesian-(unknown-variance)">&#182;</a></h2><p>In order to model unknown variance we just need to change the precision variable (tau) into a stochastic variable, then ensure that tau is included in the full pymc model like this:</p>
 
 </div>
 </div>
@@ -13006,7 +13008,7 @@ Bayesian more accurate in 12/20 datasets.
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h2><p>This Appendix has shown that population means can be estimated not only using the typical LS approach (i.e. the sample mean), but also using at least two different Bayesian approaches. Results show that Bayesian estimates are slightly more accurate than LS estimates for some datasets, but overall that there is not much difference. However, this is a very simple case of Bayesian inference, with a very simple data model. Subsequent Appendices and the main paper show that Bayesian and LS accuracies diverge as the data model becomes more complex.</p>
+<h2 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h2><p>This Appendix has shown that population means can be estimated not only using the typical LS approach (i.e. the sample mean), but also using at least two different Bayesian approaches. Results show that Bayesian estimates are slightly more accurate than LS estimates for some datasets, but overall that there is not much difference between Bayesian and LS results. However, this is a very simple case of Bayesian inference, with a very simple data model. Subsequent Appendices and the main paper show that Bayesian and LS accuracies diverge as the data model becomes increasingly complex.</p>
 
 </div>
 </div>

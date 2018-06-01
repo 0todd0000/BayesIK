@@ -11788,7 +11788,7 @@ $\newcommand{\rvector}[1]{\boldsymbol{r}_{\mathrm{#1}}}$</p>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="APPENDIX-D:--Bayesian-and-least-squares-results-divergence">APPENDIX D:  Bayesian and least-squares results divergence<a class="anchor-link" href="#APPENDIX-D:--Bayesian-and-least-squares-results-divergence">&#182;</a></h1><p>This Appendix describes a minimal inverse kinematics model for which Bayesian and least-sqaures results diverge.</p>
-<h3 id="Model">Model<a class="anchor-link" href="#Model">&#182;</a></h3><p>The planar mechanism depicted below has two degrees of freedom (DOF): one translational and one rotational. The first segment moves to a position $y$ and the second segment rotates about point A to an angle $\theta$. Two markers (M1 and M2) are rigidly fixed to the rotating segment and have constant local positions:  $\sM{1} = \myvector{35}{0}$ and $\sM{2} = \myvector{45}{0}$.</p>
+<h3 id="Model">Model<a class="anchor-link" href="#Model">&#182;</a></h3><p>The planar mechanism depicted below has two degrees of freedom (DOF): one translational and one rotational. The first (slider) segment moves to a position $y$ and the second segment rotates about point A to an angle $\theta$. Two markers (M1 and M2) are rigidly fixed to the rotating segment and have fixed local positions:  $\sM{1} = \myvector{35}{0}$ and $\sM{2} = \myvector{45}{0}$.</p>
 <p><img src="figs/rotating_slider.png" width="450"></p>
 <p>The three points' true global positions are:</p>
 <p>\begin{align}
@@ -11894,10 +11894,10 @@ $\newcommand{\rvector}[1]{\boldsymbol{r}_{\mathrm{#1}}}$</p>
 
 
 
-<div id="0666c437-62fa-44df-a68a-da1e5c20365f"></div>
+<div id="c981252c-9f6d-4dc0-a000-2acca35c4e7e"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#0666c437-62fa-44df-a68a-da1e5c20365f');
+var element = $('#c981252c-9f6d-4dc0-a000-2acca35c4e7e');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -12693,7 +12693,7 @@ if (IPython.notebook.kernel != null) {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Least-squares-solution">Least-squares solution<a class="anchor-link" href="#Least-squares-solution">&#182;</a></h1><p>This IK problem is relatively simple, so it could be be solved using an analytical approach similar to the one presented in Appendix B. However, we'll be a bit lazy and instead solve the IK problem numerically, using the "get_positions" function that we've already written above.</p>
+<h1 id="Least-squares-solution">Least-squares solution<a class="anchor-link" href="#Least-squares-solution">&#182;</a></h1><p>This IK problem is relatively simple, so it could be solved using an analytical approach similar to the one presented in Appendix B. However, we'll be a bit lazy and instead solve the IK problem numerically, using the "get_positions" function that we've already written above.</p>
 <p>Once we set values for $y$ and $\theta$ we know the global positions of $\rvector{M1}$ and $\rvector{M2}$, so we can compute the difference between those positions and our measurements as:</p>
 <p>\begin{align}
 \boldsymbol{\epsilon}_1 &amp;= \rvector{M1}' - \rvector{M1}\\
@@ -12862,10 +12862,10 @@ f(\boldsymbol{x}) =
 
 
 
-<div id="c1ab13f3-ebce-4e3f-aed4-0f6f753a12fe"></div>
+<div id="069007f3-2327-4305-916f-aaec629393d7"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#c1ab13f3-ebce-4e3f-aed4-0f6f753a12fe');
+var element = $('#069007f3-2327-4305-916f-aaec629393d7');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -14182,8 +14182,8 @@ Average absolute error (Bayesian):
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>We can see that, on average, the Bayesian approach produces smaller errors for both $y$ and $\theta$.</p>
-<p>However, you may have noticed that our calculations above have cheated a bit by using the true values of $y$ and $\theta$ as the algorithmic starting points.  Thus the results above suggest only that the Bayesian approach performs better than the least-squares approach when both start from the known true values of $y$ and $\theta$. In real IK applications the true values of $y$ and $\theta$ are of course unknown.  The main manuscript implements much more ignorant starting points to avoid this potential source of bias.</p>
-<p>Let's also check how the least-squares and Bayesian approaches compare on a case-by-case basis.</p>
+<p>However, you may have noticed that our calculations above have cheated a bit by using the true values of $y$ and $\theta$ as the algorithmic starting points.  Thus the results above suggest only that the Bayesian approach performs better than the least-squares approach when both start from the known true values of $y$ and $\theta$. In real IK applications the true values of $y$ and $\theta$ are of course unknown.  The main manuscript uses the true values of $y$ and $\theta$ as starting points only for LS estimation, to maximize its chances of converging to the true solution. The main manuscript then uses the LS solution as the starting point for the Bayesian estimate, to avoid potential biases associated with starting from the true solution. In other words, it gives LS estimation a huge advantage in finding the true maximum, but it gives Bayesian estimation no such advantage.</p>
+<p>Finally, let's check how the least-squares and Bayesian approaches compare on a case-by-case basis.</p>
 
 </div>
 </div>
