@@ -11779,7 +11779,7 @@ div#notebook {
 <ul>
 <li><p>This supplementary material assumes that the reader is new to Bayesian analysis and/or to Bayesian analysis in Python using <a href="http://pymc-devs.github.io/pymc/">PyMC</a> (Patil et al. 2010), but is familiar with basic statistical procedures like t tests and linear regression. This material closely follows <a href="https://camdavidsonpilon.github.io/Probabilistic-Programming-and-Bayesian-Methods-for-Hackers/">Davidson-Pilon (2015)</a> but from the perspective of experimentatal data analysis in science. It focusses on what Bayesian analysis can do, how to conduct Bayesian analysis using the high-level <a href="http://pymc-devs.github.io/pymc/">PyMC</a> interface, and how to interpret the results.</p>
 </li>
-<li><p>Dependencies to run the code contained in this supplementary material include: Python 3, Numpy 1.11, Scipy 1.0, Matplotlib 2.2 and PyMC 2.3.  Other versions of these dependencies may also work.</p>
+<li><p>Dependencies to run the code contained in this supplementary material include: Python 3, Numpy 1.11, Scipy 1.0, Matplotlib 2.2 and PyMC 2.3. Other versions of these dependencies may also work.</p>
 </li>
 <li><p>This supplementary material is available in both static HTML and dynamic <a href="http://jupyter.org">Jupyter notebook</a> formats. In Jupyter the notebooks can be modified and code executed directly in the notebook. Readers uninterested in the Python details can simply ignore the Python code and instead focus on the text, figures and numerical results.</p>
 </li>
@@ -11796,7 +11796,7 @@ div#notebook {
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="APPENDIX-A:-Bayesian-analysis-basics">APPENDIX A: Bayesian analysis basics<a class="anchor-link" href="#APPENDIX-A:-Bayesian-analysis-basics">&#182;</a></h1><p>This Appendix provides an overview of Bayesian analysis. It is directed at beginners and focuses on concepts rather than on mathematics.</p>
-<p>Imagine that you are going to conduct an experiment to determine whether in a population of students one knee has greater extensions strength than the other.  (This is not a particularly interesting experiment but will serve to illustrate many Bayesian analysis concepts.) Before the experiment you have no idea whether the left or right knee will be stronger, so you presume that the left is just as likely as the right to be stronger.</p>
+<p>Imagine that you are going to conduct an experiment to determine whether in a population of students the left knee extension strength is higher than the right, or vice versa.  (This is not a particularly interesting experiment but will serve to illustrate many Bayesian analysis concepts.) Before the experiment you have no idea whether the left or right knee will be stronger, so you presume that the left is just as likely as the right to be stronger.</p>
 <p>The relative left-right strength across all subjects can be represented using a single parameter <em>x</em> which ranges from zero to one, where <em>x</em>=0 implies that 100% of all students have stronger left knees, and where <em>x</em>=1 implies that 100% of all students have stronger right knees.  A value of <em>x</em>=0.5 implies that half of all students have stronger left legs, and half have stronger right legs. The experimental goal will be to find the most likely value of <em>x</em> based on the observed data.</p>
 <p>Before considering experimental data, let's first consider what we know and what we don't know about <em>x</em>:</p>
 <ul>
@@ -11808,11 +11808,7 @@ div#notebook {
 <li>We would like to update our pre-experiment beliefs regarding the value of <em>x</em> based on the experimental data.</li>
 <li>We would also like to update our uncertainty regarding <em>x</em> based on the experimental data, but we recognize that we can never know <em>x</em> precisely, so we want to retain uncertainty regarding <em>x</em> in our final results.</li>
 </ul>
-<<<<<<< HEAD
-<p>In Bayesian terms, $x$ is a stochastic variable, and our pre-experiment beliefs regarding $x$ are embodied in the <strong>prior</strong> or equivalently the "prior distribution of x". Our prior can be constructed by simulating random numbers from the presumed distribution, and visualized as follows (feel free to ignore the Python code and skip to the figure below):</p>
-=======
 <p>In Bayesian terms, $x$ is a stochastic variable, and our pre-experiment beliefs regarding $x$ are embodied in the so-called <strong>prior</strong>, or equivalently the "prior distribution of x". Our prior can be visualized as follows (feel free to ignore the Python code and skip to the figure below):</p>
->>>>>>> b7e291920b31146d32e1b8c0363e2fb9b0e4c26c
 
 </div>
 </div>
@@ -11834,7 +11830,7 @@ div#notebook {
 <span class="n">prior_analytical</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">uniform</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
 <span class="c1">#construct a numerical prior using PyMC:</span>
-<span class="n">nSamples</span> <span class="o">=</span> <span class="mi">1000</span>  <span class="c1">#number of random samples used to approximate x&#39;s distribution (here 1000, later 10,000)</span>
+<span class="n">nSamples</span> <span class="o">=</span> <span class="mi">1000</span>  <span class="c1">#number of random samples used to approximate x&#39;s distribution</span>
 <span class="n">x_stochastic</span> <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">&quot;MyPriorDistribution&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1">#stochastic variable representing our prior</span>
 <span class="n">prior_numerical</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span><span class="n">x_stochastic</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nSamples</span><span class="p">)]</span> <span class="p">)</span>  <span class="c1">#generate random data in the presumed plausible range</span>
 
@@ -11865,17 +11861,10 @@ div#notebook {
 
 
 
-<<<<<<< HEAD
-<div id="1ae645f5-c60f-41ed-948b-c79ab74cadcb"></div>
+<div id="b005f5e0-5c57-4b3e-9b07-32d8b11f403c"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#1ae645f5-c60f-41ed-948b-c79ab74cadcb');
-=======
-<div id="5ed97b5e-d061-49a9-928e-6170a549da68"></div>
-<div class="output_subarea output_javascript ">
-<script type="text/javascript">
-var element = $('#5ed97b5e-d061-49a9-928e-6170a549da68');
->>>>>>> b7e291920b31146d32e1b8c0363e2fb9b0e4c26c
+var element = $('#b005f5e0-5c57-4b3e-9b07-32d8b11f403c');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -12724,17 +12713,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<<<<<<< HEAD
-<div id="dca9e4e5-c705-4ac7-acda-13d17d498859"></div>
+<div id="394b3432-39da-45fe-8e55-7018481648cc"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#dca9e4e5-c705-4ac7-acda-13d17d498859');
-=======
-<div id="1ddc07ff-5011-4fc2-9209-231fa5ee86ae"></div>
-<div class="output_subarea output_javascript ">
-<script type="text/javascript">
-var element = $('#1ddc07ff-5011-4fc2-9209-231fa5ee86ae');
->>>>>>> b7e291920b31146d32e1b8c0363e2fb9b0e4c26c
+var element = $('#394b3432-39da-45fe-8e55-7018481648cc');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -13530,7 +13512,7 @@ if (IPython.notebook.kernel != null) {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>This idea will reappear throughout this supplementary material:  the accuracy of a numerically estimated probability density improves as the number of samples gets larger. Since larger numerical samples require more computing resources, it is often important in Bayesian analysis to find a balance between sample size and accuracy. For the remainder of this analysis we use 10,000 samples and presume that this is sufficiently accurate.</p>
+<p>This idea will reappear throughout this supplementary material:  the accuracy of a numerically estimated probability density improves as the number of samples gets larger. Since larger numerical samples require more computing resources, it is often important in Bayesian analysis to find a balance between sample size and accuracy.  For the remainder of this analysis we presume that 10,000 samples is accurate enough.</p>
 <p>A final point regarding this prior, and probability distributions in general, is its most likely value. Even though our prior implies that all values of <em>x</em> are equally plausible, the most likely value of <em>x</em> is 0.5.</p>
 
 </div>
@@ -13572,7 +13554,8 @@ if (IPython.notebook.kernel != null) {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>This is termed the maximum likelihood estimate (MLE) of <em>x</em>.  To understand why the MLE is 0.5, simply think of an alternative value like 0.7. If the MLE were 0.7 it would imply that right ($x$=1) is more likely than left ($x$=0) and therefore that not all values of <em>x</em> (from 0 to 1) are equally likely. The prior distribution of $x$ would also be different to the probability density plots above.</p>
+<p>This is termed the maximum likelihood estimate (MLE) of <em>x</em>.  To understand why the MLE is 0.5, simply think of an alternative value like 0.7. If the MLE were 0.7 it would imply that right ($x$=1) is more likely than left ($x$=0) and therefore that not all values of <em>x</em> (from 0 to 1) are equally likely. The prior distribution of  x
+  would also be different to the probability density plots above.</p>
 <p>Now that we have decided upon our prior distribution for <em>x</em>, we are ready to conduct our experiment and then update our beliefs regarding <em>x</em> based on the data we measure. Let's imagine first that we measure just a single subject and it turns out that this subject's right knee is stronger than their left knee. This observation can be represented as:</p>
 <p>\begin{equation}
 \newcommand{xobs}[]{ \ x_{\text{obs}} \ }
@@ -13649,17 +13632,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<<<<<<< HEAD
-<div id="9696d74e-6605-42eb-8dcb-0a882e1c25a4"></div>
+<div id="c58d2d24-d85e-49ae-a9a4-d8c3813fffec"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#9696d74e-6605-42eb-8dcb-0a882e1c25a4');
-=======
-<div id="47e366d7-4507-4fd5-907c-f3aaaed0d71a"></div>
-<div class="output_subarea output_javascript ">
-<script type="text/javascript">
-var element = $('#47e366d7-4507-4fd5-907c-f3aaaed0d71a');
->>>>>>> b7e291920b31146d32e1b8c0363e2fb9b0e4c26c
+var element = $('#c58d2d24-d85e-49ae-a9a4-d8c3813fffec');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -14566,17 +14542,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<<<<<<< HEAD
-<div id="dce2b7f9-8be5-4311-a340-59eca76b9282"></div>
+<div id="4457e18c-e7ab-48de-ba31-aeb057ab6630"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#dce2b7f9-8be5-4311-a340-59eca76b9282');
-=======
-<div id="7e29ecbb-6e8e-44f1-bc03-0c6046dfdd3e"></div>
-<div class="output_subarea output_javascript ">
-<script type="text/javascript">
-var element = $('#7e29ecbb-6e8e-44f1-bc03-0c6046dfdd3e');
->>>>>>> b7e291920b31146d32e1b8c0363e2fb9b0e4c26c
+var element = $('#4457e18c-e7ab-48de-ba31-aeb057ab6630');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -15563,17 +15532,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<<<<<<< HEAD
-<div id="07e183f4-dc34-4987-8ad8-0f0c8057daff"></div>
+<div id="c1db2898-490e-4088-90c8-01b3f7dad36a"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#07e183f4-dc34-4987-8ad8-0f0c8057daff');
-=======
-<div id="0f037fdb-a29b-400b-80a5-a0936c454ec2"></div>
-<div class="output_subarea output_javascript ">
-<script type="text/javascript">
-var element = $('#0f037fdb-a29b-400b-80a5-a0936c454ec2');
->>>>>>> b7e291920b31146d32e1b8c0363e2fb9b0e4c26c
+var element = $('#c1db2898-490e-4088-90c8-01b3f7dad36a');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -16443,17 +16405,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<<<<<<< HEAD
-<div id="97240c9d-a022-40b3-9105-5509281d816c"></div>
+<div id="4e2b5de6-c378-49d6-8cf5-978710909d47"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#97240c9d-a022-40b3-9105-5509281d816c');
-=======
-<div id="ff28791d-b33f-4e4c-9cf2-dadfff813b9d"></div>
-<div class="output_subarea output_javascript ">
-<script type="text/javascript">
-var element = $('#ff28791d-b33f-4e4c-9cf2-dadfff813b9d');
->>>>>>> b7e291920b31146d32e1b8c0363e2fb9b0e4c26c
+var element = $('#4e2b5de6-c378-49d6-8cf5-978710909d47');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
@@ -17317,17 +17272,10 @@ if (IPython.notebook.kernel != null) {
 
 
 
-<<<<<<< HEAD
-<div id="2b809a47-6ef4-48f7-a96f-bd6c7cfe6d32"></div>
+<div id="6f36d2b0-0eec-4b4f-bc6f-0b3b68539787"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#2b809a47-6ef4-48f7-a96f-bd6c7cfe6d32');
-=======
-<div id="97a8884c-47d0-4490-a7ee-44e523634fe6"></div>
-<div class="output_subarea output_javascript ">
-<script type="text/javascript">
-var element = $('#97a8884c-47d0-4490-a7ee-44e523634fe6');
->>>>>>> b7e291920b31146d32e1b8c0363e2fb9b0e4c26c
+var element = $('#6f36d2b0-0eec-4b4f-bc6f-0b3b68539787');
 /* Put everything inside the global mpl namespace */
 window.mpl = {};
 
