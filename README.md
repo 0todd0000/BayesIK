@@ -8,5 +8,5 @@ Version 0.1   (15 May 2018)
 Please consider citing:
 
 Pataky TC, Vanrenterghem J, Robinson MA (*in review*)
-Bayesian inverse kinematics: order-of-magnitude reduced error in marker-based estimates of planar postures and rotations.
+Bayesian inverse kinematics yields highly accurate estimates of planar postures and rotations.
 *Journal of Biomechanics*
