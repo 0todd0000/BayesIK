@@ -5,12 +5,6 @@ import numpy as np
 from scipy import optimize
 from matplotlib import pyplot as plt
 import pymc
-
-
-import sys
-dir0 = '/Users/todd/Dropbox/2019Sync/Documents/Projects/projects/_completed/2018/bayesik/Corrigendum/NEW-REPO/Python/'
-if dir0 not in sys.path:
-	sys.path.insert(0, dir0)
 import bayesik as bik
 
 
@@ -43,64 +37,6 @@ def fk(r, q):
 	return rnew[:,:2]
 
 
-from math import acos
-import numpy as np
-
-
-def _asmatrixlist(r):
-	return [ np.matrix( rr.tolist() + [0] ).T for rr in r]
-
-def ik_halvorsen(r0, r1):
-	'''
-	Halvorsen KM, Lesser M, Lundberg A (1999) 
-	A new method for estimating the axis of rotation and the center of rotation.
-	Journal of Biomechanics 32(11): 1221-1227.
-	'''
-	P0,P1        = _asmatrixlist(r0), _asmatrixlist(r1)
-	### compute instantaneous rotation using Halvorsen (1999) method:
-	DP           = [p1-p0   for p0,p1 in zip(P0,P1)]  #marker displacements
-	### compute rotation axis (Equation 2):
-	C            = np.matrix(   np.zeros((3,3))   )
-	for dp in DP:
-		C       += dp*dp.T
-	val,vec      = np.linalg.eig( C )
-	ind          = val.argmin()
-	omega        = vec[:,ind]   #instantaneous rotation axis
-	### compute center of rotation:
-	dP           = np.vstack( [dp.T  for dp in DP ]  )
-	b            = np.vstack( [dp.T * (0.5 * (p0+p1))  for dp,p0,p1 in zip(DP,P0,P1) ]  )
-	q            = np.linalg.pinv(dP) * b
-	q            = np.asarray(q).flatten()
-	### compute angular displacement:  (not from original article)
-	m0,m1        = [np.squeeze(np.array(P)).mean(axis=0)   for P in (P0,P1)]
-	sgn          = np.sign( np.cross(m0, m1)[2] )
-	a,b,c        = m0-q, m1-q, m1-m0
-	a,b,c        = [np.linalg.norm(x)  for x in (a,b,c)]
-	theta        = sgn * acos(  (a**2+b**2-c**2) / (2*a*b) )
-	q            = np.array( [q[0], q[1], theta] )
-	return q
-
-
-def ik_soderkvist(r0, r1):
-	'''
-	Soderkvist I, Wedin PA (1993)
-	Determining the movements of the skeleton using well-configured markers.
-	Journal of Biomechanics 26(12): 1473-1477.
-	'''
-	x,y   = r0.T, r1.T
-	xm,ym = x.mean(axis=1), y.mean(axis=1)
-	A,B   = np.matrix((x.T-xm).T), np.matrix((y.T-ym).T)
-	C     = B * A.T
-	u,s,v = np.linalg.svd(C)
-	detPQ = np.linalg.det(u*v.T)
-	R     = u * np.diag([1,detPQ]) * v.T
-	d     = np.asarray(   np.matrix(ym).T - R*np.matrix(xm).T   ).flatten()
-	sgn   = np.sign( R[1,0] )
-	theta = sgn * acos(R[0,0])
-	q     = np.array( [d[0], d[1], theta] )
-	return q
-
-
 def ik_ls(r0, r1, q0=[0,0,0]):
 	def objfn(x, r0, r1):
 		r0t = fk(r0, x)
@@ -130,7 +66,7 @@ def ik_bayes_model(robs0, robs1, priors):
 	# assemble Bayesian model:
 	bmodel     = pymc.Normal("qobs", observations_model, tau, value=robs1, observed=True)
 	return bmodel, tau, r, phi
-	
+
 
 def ik_bayes(robs0, robs1, priors, sample_options=None, progress_bar=True):
 	if sample_options is None:
@@ -167,8 +103,8 @@ r1                 = get_true_marker_positions(q1, length=length)   # true final
 r0n                = add_noise(r0)   # noisy initial marker positions
 r1n                = add_noise(r1)   # noisy final marker positions
 # least-squares solutions:
-qh                 = ik_halvorsen(r0n, r1n)
-qs                 = ik_soderkvist(r0n, r1n)
+qh                 = bik.ik.halvorsen(r0n, r1n)
+qs                 = bik.ik.soderkvist(r0n, r1n)
 qls                = ik_ls(r0n, r1n, q0=qs)
 # Bayesian solution:
 sample_options     = dict(niter=1000, burn=500, thin=1)     # MCMC sampling options
@@ -197,7 +133,7 @@ plt.show()
 
 
 
-#
+
 # #(1) Multiple iterations:
 # # user parameters:
 # niter              = 1000    # number of iterations (marker position datasets) to test
@@ -222,11 +158,11 @@ plt.show()
 # 	r1n            = add_noise(r1)   # noisy final marker positions
 # 	# least squares IK (Halvorsen):
 # 	t0          = time.time()
-# 	qh          = ik_halvorsen(r0n, r1n)
+# 	qh          = bik.ik.halvorsen(r0n, r1n)
 # 	th          = time.time() - t0
 # 	# least squares IK (Soderkvist):
 # 	t0          = time.time()
-# 	qs          = ik_soderkvist(r0n, r1n)
+# 	qs          = bik.ik.soderkvist(r0n, r1n)
 # 	ts          = time.time() - t0
 # 	# least squares (scipy):
 # 	t0          = time.time()

@@ -31,22 +31,21 @@ bik.util.report_sim_iteration(q, [qls, qb], absolute_q=False, labels=('LS-IK','B
 
 # #(1) Multiple iterations:
 # # user parameters:
-# fast        = True     # fast simulation (few Bayesian iterations)
 # nlinks      = 1
 # niter       = 1000
 # sigmas      = dict(r=0.1, theta=pi/4)  # SDs for prior normal distributions
 # seglengths  = [0.45,0.35,0.25][:nlinks]
-# bit,bb,bth  = (1e4,1e3,2) if fast else (1e5,1e4,5)  # MCMC parameters
+# bit,bb,bth  = (1e4,1e3,2)  # MCMC parameters (fast, for checking)
+# # bit,bb,bth  = (1e5,1e4,5)  # MCMC parameters (full simulation)
 # # derived parameters:
 # np.random.seed(nlinks)
 # nq          = 2 + nlinks
-# dirname     = 'sim-nlink-fast' if fast else 'sim-nlink'
-# fnameNPZ    = os.path.join( bik.dirREPO, 'Data', dirname, f'links{nlinks}.npz')
+# fnameNPZ    = os.path.join( bik.dirREPO, 'Data', f'links{nlinks}.npz')
 # SIGMA       = np.random.uniform(0.0002, 0.002, niter)
 # THETA       = np.random.uniform(-pi/2, pi/2, size=(niter,nlinks))
 # # run simulation:
-# Q,QLS,QB    = [np.empty( (niter, nq) )   for i in range(3)]
-# TLS,TB      = [np.empty(niter)   for i in range(2)]
+# Q,QLS,QB    = [np.zeros( (niter, nq) )   for i in range(3)]
+# TLS,TB      = [np.zeros(niter)   for i in range(2)]
 # for i in range(niter):
 # 	print( f'Iteration {i+1} of {niter}...' )
 # 	q_true      = np.hstack( [[0, 0], THETA[i]] )

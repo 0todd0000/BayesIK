@@ -33,15 +33,17 @@ def halvorsen(r0, r1):
 	a,b,c        = m0-q, m1-q, m1-m0
 	a,b,c        = [np.linalg.norm(x)  for x in (a,b,c)]
 	theta        = sgn * acos(  (a**2+b**2-c**2) / (2*a*b) )
-	return q, theta
+	q            = np.array( [q[0], q[1], theta] )
+	return q
 
 
-def soderkvist(x, y):
+def soderkvist(r0, r1):
 	'''
 	Soderkvist I, Wedin PA (1993)
 	Determining the movements of the skeleton using well-configured markers.
 	Journal of Biomechanics 26(12): 1473-1477.
 	'''
+	x,y   = r0.T, r1.T
 	xm,ym = x.mean(axis=1), y.mean(axis=1)
 	A,B   = np.matrix((x.T-xm).T), np.matrix((y.T-ym).T)
 	C     = B * A.T
@@ -51,4 +53,5 @@ def soderkvist(x, y):
 	d     = np.asarray(   np.matrix(ym).T - R*np.matrix(xm).T   ).flatten()
 	sgn   = np.sign( R[1,0] )
 	theta = sgn * acos(R[0,0])
-	return d, theta
+	q     = np.array( [d[0], d[1], theta] )
+	return q

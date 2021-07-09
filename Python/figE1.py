@@ -6,12 +6,10 @@ from matplotlib import pyplot as plt
 import bayesik as bik
 
 
-fast      = False
 
 
 nlinks    = 2
-dirname   = 'sim-nlink-fast' if fast else 'sim-nlink'
-fnameNPZ  = os.path.join( bik.dirREPO, 'Data', dirname, f'links{nlinks}.npz')
+fnameNPZ  = os.path.join( bik.dirREPO, 'Data', f'links{nlinks}.npz')
 scale     = [1000, 1000] + [180/pi]*nlinks
 with np.load(fnameNPZ) as Z:
 	Q     = scale * Z['Q']
@@ -51,7 +49,7 @@ plt.tight_layout()
 plt.show()
 
 
-plt.savefig(   os.path.join( bik.dirREPO, 'Appendix', 'ipynb', 'figs', f'error-{nlinks}-link.png')   )
+# plt.savefig(   os.path.join( bik.dirREPO, 'Appendix', 'ipynb', 'figs', f'error-{nlinks}-link.png')   )
 
 
 
