@@ -3,7 +3,7 @@
 <head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>AppendixB</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>AppendixF</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 
 
 
@@ -14260,38 +14260,110 @@ a.anchor-link {
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p>$\newcommand{\myvector}[2]{\left\{ \begin{array}{c}#1\\#2\end{array} \right\}}$
-$\newcommand{\sM}[1]{s_{\mathrm{M#1}}}$
-$\newcommand{\xM}[1]{x_{\mathrm{M#1}}}$
-$\newcommand{\xpM}[1]{x'_{\mathrm{M#1}}}$</p>
+$\newcommand{\mymatrix}[4]{\left[ \begin{array}{c}#1&amp;#2\\#3&amp;#4\end{array} \right]}$
+$\newcommand{\sM}[1]{\boldsymbol{s}_{\mathrm{M#1}}}$
+$\newcommand{\rvector}[1]{\boldsymbol{r}_{\mathrm{#1}}}$</p>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="APPENDIX-B:--Bayesian-vs.-least-squares-estimates-of-population-means">APPENDIX B:  Bayesian vs. least-squares estimates of population means<a class="anchor-link" href="#APPENDIX-B:--Bayesian-vs.-least-squares-estimates-of-population-means">¶</a></h1><p>This Appendix compares Bayesian to least-squares (LS) estimates of population means, where the LS estimate is simply the sample mean (or arithmetic mean). This Appendix aims to demonstrate that even rudimentary LS concepts like the sample mean can be interpreted somewhat differently when regarding data from a Bayesian perspective.</p>
-<p>Below two Bayesian approaches to population mean estimation are described, and these results are then subsequently compared to the LS mean.</p>
-<p>Let's start by drawing a random sample from the standard normal distribution, for which the true population mean and standard deviation (SD) are 0 and 1, respectively:</p>
+<h1 id="APPENDIX-F:--Effect-of-informative-priors">APPENDIX F:  Effect of informative priors<a class="anchor-link" href="#APPENDIX-F:--Effect-of-informative-priors">¶</a></h1><p>This Appendix revists Appendix D to consider the effect of informative priors.</p>
+<p>Let's first assemble all relevant functions from Appendix D. Of these functions, the only function that has been changed relative to Appendix D is <code>solution_bayesian</code>, which here offer three sets of prior distribution options: (1) vague, (2) informative and (3) highly informative.
+<br>
+<br></p>
 
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> notebook
-
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sin</span><span class="p">,</span><span class="n">cos</span><span class="p">,</span><span class="n">radians</span><span class="p">,</span><span class="n">degrees</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">optimize</span>
 <span class="kn">import</span> <span class="nn">pymc</span>
 
-<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>        <span class="c1">#arbitrarily set the random number generator seed</span>
-<span class="n">J</span> <span class="o">=</span> <span class="mi">5</span>                    <span class="c1">#sample size</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>   <span class="c1">#random data sample</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'A random sample from the standard normal distribution:'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'   (True population mean = 0)'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'   (True population SD   = 1)'</span><span class="p">)</span>   <span class="c1">#standard deviation (SD)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">rotation_matrix</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
+    <span class="sd">'''Construct rotation matrix'''</span>
+    <span class="n">c</span><span class="p">,</span><span class="n">s</span>    <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="n">R</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span>  <span class="p">[[</span><span class="n">c</span><span class="p">,</span> <span class="o">-</span><span class="n">s</span><span class="p">],</span> <span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">c</span><span class="p">]]</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">R</span>
+
+
+<span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+    <span class="sd">'''Rotate a position vector r using rotation matrix R'''</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>  <span class="p">(</span><span class="n">R</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">mat</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>  <span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">get_positions</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
+    <span class="sd">'''Compute global marker positions given y and theta'''</span>
+    <span class="n">rA</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>       <span class="c1">#global A position</span>
+    <span class="n">R</span>      <span class="o">=</span> <span class="n">rotation_matrix</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="n">rM1</span>    <span class="o">=</span> <span class="n">rA</span> <span class="o">+</span> <span class="n">rotate</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">sM1</span><span class="p">)</span>    <span class="c1">#global M1 position</span>
+    <span class="n">rM2</span>    <span class="o">=</span> <span class="n">rA</span> <span class="o">+</span> <span class="n">rotate</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">sM2</span><span class="p">)</span>    <span class="c1">#global M2 position</span>
+    <span class="k">return</span> <span class="n">rM1</span><span class="p">,</span><span class="n">rM2</span>
+
+
+<span class="k">def</span> <span class="nf">measurement_error</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">q_obs</span><span class="p">):</span>
+    <span class="n">y</span><span class="p">,</span><span class="n">theta</span> <span class="o">=</span> <span class="n">x</span>
+    <span class="n">rpM1</span>    <span class="o">=</span> <span class="n">q_obs</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">rpM2</span>    <span class="o">=</span> <span class="n">q_obs</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+    <span class="n">rM1</span><span class="p">,</span><span class="n">rM2</span> <span class="o">=</span> <span class="n">get_positions</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+    <span class="n">e1</span><span class="p">,</span><span class="n">e2</span>   <span class="o">=</span> <span class="n">rpM1</span> <span class="o">-</span> <span class="n">rM1</span><span class="p">,</span> <span class="n">rpM2</span> <span class="o">-</span> <span class="n">rM2</span>
+    <span class="n">e1</span><span class="p">,</span><span class="n">e2</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">e2</span><span class="p">)</span>
+    <span class="n">f</span>       <span class="o">=</span> <span class="n">e1</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">e2</span><span class="o">**</span><span class="mi">2</span>
+    <span class="k">return</span> <span class="n">f</span>
+
+
+<span class="k">def</span> <span class="nf">solution_ls</span><span class="p">(</span><span class="n">q_obs</span><span class="p">):</span>
+    <span class="n">x0</span>      <span class="o">=</span> <span class="p">[</span><span class="n">y_true</span><span class="p">,</span> <span class="n">theta_true</span><span class="p">]</span>  <span class="c1">#initial (y, theta) guess</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">measurement_error</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">q_obs</span><span class="p">,))</span>
+    <span class="n">y</span><span class="p">,</span><span class="n">theta</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">x</span>
+    <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="n">degrees</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">solution_bayesian</span><span class="p">(</span><span class="n">q_obs</span><span class="p">,</span> <span class="n">prior</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">'''</span>
+<span class="sd">    prior=1 :  vague prior</span>
+<span class="sd">    prior=2 :  informative prior (using LS solution;  same as in Appendix D)</span>
+<span class="sd">    prior=3 :  highly informative prior</span>
+<span class="sd">    '''</span>
+    
+    <span class="k">if</span> <span class="n">prior</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>    <span class="c1"># vague prior</span>
+        <span class="n">tau</span>     <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">"tau"</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="n">y</span>       <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">"y"</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="n">theta</span>   <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">"theta"</span><span class="p">,</span> <span class="o">-</span><span class="n">radians</span><span class="p">(</span><span class="mi">90</span><span class="p">),</span> <span class="n">radians</span><span class="p">(</span><span class="mi">90</span><span class="p">))</span>
+    
+    <span class="k">elif</span> <span class="n">prior</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>  <span class="c1"># LS-informed prior</span>
+        <span class="n">qls</span>     <span class="o">=</span> <span class="n">solution_ls</span><span class="p">(</span> <span class="n">q_obs</span> <span class="p">)</span>
+        <span class="n">yls</span>     <span class="o">=</span> <span class="n">qls</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>              
+        <span class="n">thetals</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span> <span class="n">qls</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>   
+        <span class="n">tau</span>     <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">"tau"</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">noise_amp</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">y</span>       <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">yls</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">yls</span><span class="p">)</span>    
+        <span class="n">theta</span>   <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">"theta"</span><span class="p">,</span> <span class="n">thetals</span><span class="p">,</span> <span class="n">radians</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">value</span><span class="o">=</span><span class="n">thetals</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">prior</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>  <span class="c1"># highly informative prior</span>
+        <span class="n">tau</span>     <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">"tau"</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">noise_amp</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">y</span>       <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">"y"</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">y_true</span><span class="p">)</span>
+        <span class="n">theta</span>   <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">"theta"</span><span class="p">,</span> <span class="n">theta_true</span><span class="p">,</span> <span class="n">radians</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">value</span><span class="o">=</span><span class="n">theta_true</span><span class="p">)</span>
+
+
+    <span class="nd">@pymc</span><span class="o">.</span><span class="n">deterministic</span>
+    <span class="k">def</span> <span class="nf">observations_model</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">):</span>
+        <span class="n">rM1</span><span class="p">,</span><span class="n">rM2</span> <span class="o">=</span> <span class="n">get_positions</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+        <span class="n">q</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">rM1</span><span class="p">,</span> <span class="n">rM2</span><span class="p">])</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">q</span>
+    <span class="n">q_model</span>   <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">"q"</span><span class="p">,</span> <span class="n">observations_model</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">q_obs</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">mcmc</span>      <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">MCMC</span><span class="p">([</span><span class="n">q_model</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">tau</span><span class="p">])</span>
+    <span class="n">mcmc</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">20000</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="n">progress_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">Y</span>         <span class="o">=</span> <span class="n">mcmc</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s1">'y'</span><span class="p">)[:]</span>
+    <span class="n">THETA</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span> <span class="n">mcmc</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s1">'theta'</span><span class="p">)[:]</span> <span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">Y</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">THETA</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 </pre></div>
 
      </div>
@@ -14299,37 +14371,14 @@ $\newcommand{\xpM}[1]{x'_{\mathrm{M#1}}}$</p>
 </div>
 </div>
 
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-
-
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>A random sample from the standard normal distribution:
-   (True population mean = 0)
-   (True population SD   = 1)
-[ 0.05056171  0.49995133 -0.99590893  0.69359851 -0.41830152]
-</pre>
-</div>
-</div>
-
-</div>
-
-</div>
-
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Approach-1:-Least-squares">Approach 1: Least-squares<a class="anchor-link" href="#Approach-1:-Least-squares">¶</a></h2><p>The least squares (LS) solution minimizes the following function:</p>
-\begin{equation}
-f(x)  = \sum (y_i - x)^2
-\end{equation}<p>where $x$ is the estimate of the population mean, and $y_i$ are the individual sample observations. The value of $x$ which minimizes $f(x)$ is the sample mean:</p>
+<p><br>
+<br></p>
+<p>Let's next calculate Bayesian solutions for all three sets of priors in <code>solution_bayesian</code> using the simulated the dataset from Appendix D.</p>
+<p><br>
+<br></p>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
@@ -14338,9 +14387,46 @@ f(x)  = \sum (y_i - x)^2
 <div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">mean_ls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span> <span class="n">y</span> <span class="p">)</span>  <span class="c1">#optimum value for "x" in the equation above</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'Least-squares estimate of the population mean (i.e. sample mean):'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span> <span class="n">mean_ls</span> <span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">### local positions:</span>
+<span class="n">sM1</span>        <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">35.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>  <span class="c1"># cm</span>
+<span class="n">sM2</span>        <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">45.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>  <span class="c1"># cm</span>
+
+<span class="c1">### true values:</span>
+<span class="n">y_true</span>      <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span>
+<span class="n">theta_true</span>  <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c1">### true marker positions:</span>
+<span class="n">rM1</span><span class="p">,</span><span class="n">rM2</span>    <span class="o">=</span> <span class="n">get_positions</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">theta_true</span><span class="p">)</span> 
+<span class="n">q_true</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">rM1</span><span class="p">,</span> <span class="n">rM2</span><span class="p">])</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+<span class="c1">### measurements:</span>
+<span class="n">rpM1</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">33.51</span><span class="p">,</span> <span class="mf">12.11</span><span class="p">])</span>
+<span class="n">rpM2</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">42.63</span><span class="p">,</span> <span class="mf">16.18</span><span class="p">])</span>
+
+<span class="c1">### simulation parameters:</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">nIterations</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">noise_amp</span>   <span class="o">=</span> <span class="mf">0.05</span>  <span class="c1"># cm</span>
+<span class="n">Q_obs</span>       <span class="o">=</span> <span class="n">q_true</span> <span class="o">+</span> <span class="n">noise_amp</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">nIterations</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+
+<span class="c1">### run simulation:</span>
+<span class="n">RESULTS_LS</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="p">[</span><span class="n">solution_ls</span><span class="p">(</span><span class="n">q_obs</span><span class="p">)</span>  <span class="k">for</span> <span class="n">q_obs</span> <span class="ow">in</span> <span class="n">Q_obs</span><span class="p">]</span> <span class="p">)</span>
+<span class="n">RESULTS_B1</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">(</span><span class="n">nIterations</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
+<span class="n">RESULTS_B2</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">(</span><span class="n">nIterations</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
+<span class="n">RESULTS_B3</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span> <span class="p">(</span><span class="n">nIterations</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">q_obs</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Q_obs</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'Iteration </span><span class="si">%d</span><span class="s1"> of </span><span class="si">%d</span><span class="s1">...'</span> <span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nIterations</span><span class="p">))</span>
+    <span class="n">y1</span><span class="p">,</span><span class="n">theta1</span> <span class="o">=</span> <span class="n">solution_bayesian</span><span class="p">(</span><span class="n">q_obs</span><span class="p">,</span> <span class="n">prior</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">y2</span><span class="p">,</span><span class="n">theta2</span> <span class="o">=</span> <span class="n">solution_bayesian</span><span class="p">(</span><span class="n">q_obs</span><span class="p">,</span> <span class="n">prior</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">y3</span><span class="p">,</span><span class="n">theta3</span> <span class="o">=</span> <span class="n">solution_bayesian</span><span class="p">(</span><span class="n">q_obs</span><span class="p">,</span> <span class="n">prior</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">RESULTS_B1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">y1</span><span class="p">,</span> <span class="n">theta1</span><span class="p">]</span>
+    <span class="n">RESULTS_B2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">y2</span><span class="p">,</span> <span class="n">theta2</span><span class="p">]</span>
+    <span class="n">RESULTS_B3</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">y3</span><span class="p">,</span> <span class="n">theta3</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'   y1 = </span><span class="si">%.3f</span><span class="s1">,  theta1 = </span><span class="si">%.3f</span><span class="s1">'</span> <span class="o">%</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span><span class="n">theta1</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'   y2 = </span><span class="si">%.3f</span><span class="s1">,  theta2 = </span><span class="si">%.3f</span><span class="s1">'</span> <span class="o">%</span><span class="p">(</span><span class="n">y2</span><span class="p">,</span><span class="n">theta2</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'   y3 = </span><span class="si">%.3f</span><span class="s1">,  theta3 = </span><span class="si">%.3f</span><span class="s1">'</span> <span class="o">%</span><span class="p">(</span><span class="n">y3</span><span class="p">,</span><span class="n">theta3</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">()</span>
 </pre></div>
 
      </div>
@@ -14360,8 +14446,56 @@ f(x)  = \sum (y_i - x)^2
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Least-squares estimate of the population mean (i.e. sample mean):
--0.0340197804923
+<pre>Iteration 1 of 10...
+   y1 = -0.040,  theta1 = 5.014
+   y2 = -0.053,  theta2 = 5.026
+   y3 = -0.075,  theta3 = 5.056
+
+Iteration 2 of 10...
+   y1 = 0.397,  theta1 = 4.255
+   y2 = -0.061,  theta2 = 4.904
+   y3 = -0.007,  theta3 = 4.823
+
+Iteration 3 of 10...
+   y1 = 0.214,  theta1 = 4.628
+   y2 = -0.165,  theta2 = 5.161
+   y3 = -0.193,  theta3 = 5.200
+
+Iteration 4 of 10...
+   y1 = 1.005,  theta1 = 3.437
+   y2 = -0.038,  theta2 = 4.928
+   y3 = -0.006,  theta3 = 4.882
+
+Iteration 5 of 10...
+   y1 = 0.131,  theta1 = 4.629
+   y2 = 0.182,  theta2 = 4.558
+   y3 = -0.035,  theta3 = 4.867
+
+Iteration 6 of 10...
+   y1 = 0.745,  theta1 = 3.797
+   y2 = -0.054,  theta2 = 4.928
+   y3 = -0.078,  theta3 = 4.963
+
+Iteration 7 of 10...
+   y1 = 0.161,  theta1 = 4.562
+   y2 = -0.100,  theta2 = 4.942
+   y3 = -0.084,  theta3 = 4.920
+
+Iteration 8 of 10...
+   y1 = 0.065,  theta1 = 4.819
+   y2 = 0.269,  theta2 = 4.536
+   y3 = 0.156,  theta3 = 4.695
+
+Iteration 9 of 10...
+   y1 = 0.391,  theta1 = 4.235
+   y2 = -0.529,  theta2 = 5.553
+   y3 = -0.492,  theta3 = 5.500
+
+Iteration 10 of 10...
+   y1 = 0.186,  theta1 = 4.626
+   y2 = 0.253,  theta2 = 4.523
+   y3 = 0.156,  theta3 = 4.662
+
 </pre>
 </div>
 </div>
@@ -14373,13 +14507,11 @@ f(x)  = \sum (y_i - x)^2
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Note that the sample mean is not zero, even through the true population mean is zero.  For the sample mean to converge precisely to the true population mean, one would generally have to draw an infinitely large sample, or sample the entire population.</p>
-
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Approach-2:-Bayesian-(known-variance)">Approach 2: Bayesian (known variance)<a class="anchor-link" href="#Approach-2:-Bayesian-(known-variance)">¶</a></h2><p>The simplest Bayesian approach is to presume that population SD ($\sigma$) is known. Let's implement the full solution in PyMC, then consider the commands afterwards.</p>
+<p><br>
+<br></p>
+<p>Last let's summarize the error from the various methods.</p>
+<p><br>
+<br></p>
 
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
@@ -14388,21 +14520,20 @@ f(x)  = \sum (y_i - x)^2
 <div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#(1) Build model</span>
-<span class="n">x</span>          <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">"x"</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1">#prior distribution for the population mean</span>
-<span class="n">sigma</span>      <span class="o">=</span> <span class="mi">1</span>                         <span class="c1">#known population standard deviation (SD)</span>
-<span class="n">tau</span>        <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">sigma</span><span class="o">**</span><span class="mi">2</span>            <span class="c1">#measurement precision ( 1 / SD^2 )</span>
-<span class="n">data_model</span> <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">"data_model"</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>  <span class="c1">#model of the observations</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">x_true</span>   <span class="o">=</span> <span class="p">[</span><span class="n">y_true</span><span class="p">,</span> <span class="n">degrees</span><span class="p">(</span><span class="n">theta_true</span><span class="p">)]</span>
+<span class="n">error_LS</span> <span class="o">=</span> <span class="n">RESULTS_LS</span> <span class="o">-</span> <span class="n">x_true</span>
+<span class="n">error_B1</span> <span class="o">=</span> <span class="n">RESULTS_B1</span> <span class="o">-</span> <span class="n">x_true</span>
+<span class="n">error_B2</span> <span class="o">=</span> <span class="n">RESULTS_B2</span> <span class="o">-</span> <span class="n">x_true</span>
+<span class="n">error_B3</span> <span class="o">=</span> <span class="n">RESULTS_B3</span> <span class="o">-</span> <span class="n">x_true</span>
 
-<span class="c1">#(2) Conduct inference:</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Model</span><span class="p">([</span><span class="n">data_model</span><span class="p">,</span> <span class="n">x</span><span class="p">])</span>    <span class="c1">#full model containing data model and all stochastic variables</span>
-<span class="n">mcmc</span>  <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">MCMC</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>               <span class="c1">#Markov Chain Monte Carlo sampler</span>
-<span class="n">mcmc</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">iter</span><span class="o">=</span><span class="mi">11000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>     <span class="c1">#MC sampling</span>
-<span class="n">post</span>  <span class="o">=</span> <span class="n">mcmc</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)[:]</span>             <span class="c1">#posterior distribution for the population mean</span>
-<span class="n">bmean</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>                    <span class="c1">#Bayesian estimate of the population mean</span>
-<span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'Bayesian estimate of the population mean (known variance):'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">bmean</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Average absolute error (least-squares):'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'   y: </span><span class="si">%.3f</span><span class="s1">,  theta: </span><span class="si">%.3f</span><span class="s1">'</span> <span class="o">%</span><span class="k">tuple</span>( np.abs(error_LS).mean(axis=0) ) )
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Average absolute error (Bayesian prior = 1):'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'   y: </span><span class="si">%.3f</span><span class="s1">,  theta: </span><span class="si">%.3f</span><span class="s1">'</span> <span class="o">%</span><span class="k">tuple</span>( np.abs(error_B1).mean(axis=0) ) )
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Average absolute error (Bayesian prior = 2):'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'   y: </span><span class="si">%.3f</span><span class="s1">,  theta: </span><span class="si">%.3f</span><span class="s1">'</span> <span class="o">%</span><span class="k">tuple</span>( np.abs(error_B2).mean(axis=0) ) )
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Average absolute error (Bayesian prior = 3):'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'   y: </span><span class="si">%.3f</span><span class="s1">,  theta: </span><span class="si">%.3f</span><span class="s1">'</span> <span class="o">%</span><span class="k">tuple</span>( np.abs(error_B3).mean(axis=0) ) )
 </pre></div>
 
      </div>
@@ -14422,9 +14553,14 @@ f(x)  = \sum (y_i - x)^2
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre> [-----------------100%-----------------] 11000 of 11000 complete in 0.4 sec
-Bayesian estimate of the population mean (known variance):
--0.0292631259209
+<pre>Average absolute error (least-squares):
+   y: 0.170,  theta: 0.232
+Average absolute error (Bayesian prior = 1):
+   y: 0.425,  theta: 0.603
+Average absolute error (Bayesian prior = 2):
+   y: 0.169,  theta: 0.242
+Average absolute error (Bayesian prior = 3):
+   y: 0.131,  theta: 0.195
 </pre>
 </div>
 </div>
@@ -14436,1048 +14572,13 @@ Bayesian estimate of the population mean (known variance):
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Note that the Bayesian estimate of the population mean is closer to its true value of zero than was the LS estimate. Let's consider each step of the Bayesian estimation procedure outlined in the code above.</p>
-<p>In order to conduct Bayesian inference regarding experimental data, a model of those data is required. The first step is to create a prior distribution for each stochastic variable:</p>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">x</span>          <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">"x"</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1">#naive prior distribution for the population mean</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>This prior implies that we expect the true population mean to be between -1 and +1, and that all values in this range are equally likely. As described in Appendix A, the prior can affect the final results, and we shall consider effects of priors below.</p>
-<p>The next step is to build a model of the data:</p>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_model</span> <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">"data_model"</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>  <span class="c1">#model of the observations</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>This command implies that we believe that our data sample comes from a normal distribution with an unknown population mean of x and a known precision of tau=1. The "observed=True" and "value=y" keyword arguments specify that the values in y were observed. In other words, based on the values y we want to find the most likely value for x, or more generally the posterior distribution for x given y.</p>
-<p>Once we have the model we can conduct inference, and the Markov Chain Monte Carlo (MCMC)-related inference commands above follow from Appendix A so are not discussed further here. Following inference, it can be informative to visualize the prior and the posterior distributions:</p>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">prior</span>   <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">)]</span>
-
-<span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">ax</span> <span class="o">=</span> <span class="n">pyplot</span><span class="o">.</span><span class="n">axes</span><span class="p">()</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">prior</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Prior'</span><span class="p">)</span>      <span class="c1">#prior distribution for x</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">post</span><span class="p">,</span>  <span class="n">bins</span><span class="o">=</span><span class="mi">21</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Posterior'</span><span class="p">)</span>  <span class="c1">#posterior distribution for x</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-
-
-
-
-<div id="71a8dfe4-bd4c-4c61-bdc7-8701fc8fe841" class="jp-RenderedJavaScript jp-OutputArea-output " data-mime-type="application/javascript">
-<script type="text/javascript">
-var element = document.getElementById('71a8dfe4-bd4c-4c61-bdc7-8701fc8fe841');
-/* Put everything inside the global mpl namespace */
-window.mpl = {};
-
-
-mpl.get_websocket_type = function() {
-    if (typeof(WebSocket) !== 'undefined') {
-        return WebSocket;
-    } else if (typeof(MozWebSocket) !== 'undefined') {
-        return MozWebSocket;
-    } else {
-        alert('Your browser does not have WebSocket support.' +
-              'Please try Chrome, Safari or Firefox ≥ 6. ' +
-              'Firefox 4 and 5 are also supported but you ' +
-              'have to enable WebSockets in about:config.');
-    };
-}
-
-mpl.figure = function(figure_id, websocket, ondownload, parent_element) {
-    this.id = figure_id;
-
-    this.ws = websocket;
-
-    this.supports_binary = (this.ws.binaryType != undefined);
-
-    if (!this.supports_binary) {
-        var warnings = document.getElementById("mpl-warnings");
-        if (warnings) {
-            warnings.style.display = 'block';
-            warnings.textContent = (
-                "This browser does not support binary websocket messages. " +
-                    "Performance may be slow.");
-        }
-    }
-
-    this.imageObj = new Image();
-
-    this.context = undefined;
-    this.message = undefined;
-    this.canvas = undefined;
-    this.rubberband_canvas = undefined;
-    this.rubberband_context = undefined;
-    this.format_dropdown = undefined;
-
-    this.image_mode = 'full';
-
-    this.root = $('<div/>');
-    this._root_extra_style(this.root)
-    this.root.attr('style', 'display: inline-block');
-
-    $(parent_element).append(this.root);
-
-    this._init_header(this);
-    this._init_canvas(this);
-    this._init_toolbar(this);
-
-    var fig = this;
-
-    this.waiting = false;
-
-    this.ws.onopen =  function () {
-            fig.send_message("supports_binary", {value: fig.supports_binary});
-            fig.send_message("send_image_mode", {});
-            if (mpl.ratio != 1) {
-                fig.send_message("set_dpi_ratio", {'dpi_ratio': mpl.ratio});
-            }
-            fig.send_message("refresh", {});
-        }
-
-    this.imageObj.onload = function() {
-            if (fig.image_mode == 'full') {
-                // Full images could contain transparency (where diff images
-                // almost always do), so we need to clear the canvas so that
-                // there is no ghosting.
-                fig.context.clearRect(0, 0, fig.canvas.width, fig.canvas.height);
-            }
-            fig.context.drawImage(fig.imageObj, 0, 0);
-        };
-
-    this.imageObj.onunload = function() {
-        fig.ws.close();
-    }
-
-    this.ws.onmessage = this._make_on_message_function(this);
-
-    this.ondownload = ondownload;
-}
-
-mpl.figure.prototype._init_header = function() {
-    var titlebar = $(
-        '<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ' +
-        'ui-helper-clearfix"/>');
-    var titletext = $(
-        '<div class="ui-dialog-title" style="width: 100%; ' +
-        'text-align: center; padding: 3px;"/>');
-    titlebar.append(titletext)
-    this.root.append(titlebar);
-    this.header = titletext[0];
-}
-
-
-
-mpl.figure.prototype._canvas_extra_style = function(canvas_div) {
-
-}
-
-
-mpl.figure.prototype._root_extra_style = function(canvas_div) {
-
-}
-
-mpl.figure.prototype._init_canvas = function() {
-    var fig = this;
-
-    var canvas_div = $('<div/>');
-
-    canvas_div.attr('style', 'position: relative; clear: both; outline: 0');
-
-    function canvas_keyboard_event(event) {
-        return fig.key_event(event, event['data']);
-    }
-
-    canvas_div.keydown('key_press', canvas_keyboard_event);
-    canvas_div.keyup('key_release', canvas_keyboard_event);
-    this.canvas_div = canvas_div
-    this._canvas_extra_style(canvas_div)
-    this.root.append(canvas_div);
-
-    var canvas = $('<canvas/>');
-    canvas.addClass('mpl-canvas');
-    canvas.attr('style', "left: 0; top: 0; z-index: 0; outline: 0")
-
-    this.canvas = canvas[0];
-    this.context = canvas[0].getContext("2d");
-
-    var backingStore = this.context.backingStorePixelRatio ||
-	this.context.webkitBackingStorePixelRatio ||
-	this.context.mozBackingStorePixelRatio ||
-	this.context.msBackingStorePixelRatio ||
-	this.context.oBackingStorePixelRatio ||
-	this.context.backingStorePixelRatio || 1;
-
-    mpl.ratio = (window.devicePixelRatio || 1) / backingStore;
-
-    var rubberband = $('<canvas/>');
-    rubberband.attr('style', "position: absolute; left: 0; top: 0; z-index: 1;")
-
-    var pass_mouse_events = true;
-
-    canvas_div.resizable({
-        start: function(event, ui) {
-            pass_mouse_events = false;
-        },
-        resize: function(event, ui) {
-            fig.request_resize(ui.size.width, ui.size.height);
-        },
-        stop: function(event, ui) {
-            pass_mouse_events = true;
-            fig.request_resize(ui.size.width, ui.size.height);
-        },
-    });
-
-    function mouse_event_fn(event) {
-        if (pass_mouse_events)
-            return fig.mouse_event(event, event['data']);
-    }
-
-    rubberband.mousedown('button_press', mouse_event_fn);
-    rubberband.mouseup('button_release', mouse_event_fn);
-    // Throttle sequential mouse events to 1 every 20ms.
-    rubberband.mousemove('motion_notify', mouse_event_fn);
-
-    rubberband.mouseenter('figure_enter', mouse_event_fn);
-    rubberband.mouseleave('figure_leave', mouse_event_fn);
-
-    canvas_div.on("wheel", function (event) {
-        event = event.originalEvent;
-        event['data'] = 'scroll'
-        if (event.deltaY < 0) {
-            event.step = 1;
-        } else {
-            event.step = -1;
-        }
-        mouse_event_fn(event);
-    });
-
-    canvas_div.append(canvas);
-    canvas_div.append(rubberband);
-
-    this.rubberband = rubberband;
-    this.rubberband_canvas = rubberband[0];
-    this.rubberband_context = rubberband[0].getContext("2d");
-    this.rubberband_context.strokeStyle = "#000000";
-
-    this._resize_canvas = function(width, height) {
-        // Keep the size of the canvas, canvas container, and rubber band
-        // canvas in synch.
-        canvas_div.css('width', width)
-        canvas_div.css('height', height)
-
-        canvas.attr('width', width * mpl.ratio);
-        canvas.attr('height', height * mpl.ratio);
-        canvas.attr('style', 'width: ' + width + 'px; height: ' + height + 'px;');
-
-        rubberband.attr('width', width);
-        rubberband.attr('height', height);
-    }
-
-    // Set the figure to an initial 600x600px, this will subsequently be updated
-    // upon first draw.
-    this._resize_canvas(600, 600);
-
-    // Disable right mouse context menu.
-    $(this.rubberband_canvas).bind("contextmenu",function(e){
-        return false;
-    });
-
-    function set_focus () {
-        canvas.focus();
-        canvas_div.focus();
-    }
-
-    window.setTimeout(set_focus, 100);
-}
-
-mpl.figure.prototype._init_toolbar = function() {
-    var fig = this;
-
-    var nav_element = $('<div/>')
-    nav_element.attr('style', 'width: 100%');
-    this.root.append(nav_element);
-
-    // Define a callback function for later on.
-    function toolbar_event(event) {
-        return fig.toolbar_button_onclick(event['data']);
-    }
-    function toolbar_mouse_event(event) {
-        return fig.toolbar_button_onmouseover(event['data']);
-    }
-
-    for(var toolbar_ind in mpl.toolbar_items) {
-        var name = mpl.toolbar_items[toolbar_ind][0];
-        var tooltip = mpl.toolbar_items[toolbar_ind][1];
-        var image = mpl.toolbar_items[toolbar_ind][2];
-        var method_name = mpl.toolbar_items[toolbar_ind][3];
-
-        if (!name) {
-            // put a spacer in here.
-            continue;
-        }
-        var button = $('<button/>');
-        button.addClass('ui-button ui-widget ui-state-default ui-corner-all ' +
-                        'ui-button-icon-only');
-        button.attr('role', 'button');
-        button.attr('aria-disabled', 'false');
-        button.click(method_name, toolbar_event);
-        button.mouseover(tooltip, toolbar_mouse_event);
-
-        var icon_img = $('<span/>');
-        icon_img.addClass('ui-button-icon-primary ui-icon');
-        icon_img.addClass(image);
-        icon_img.addClass('ui-corner-all');
-
-        var tooltip_span = $('<span/>');
-        tooltip_span.addClass('ui-button-text');
-        tooltip_span.html(tooltip);
-
-        button.append(icon_img);
-        button.append(tooltip_span);
-
-        nav_element.append(button);
-    }
-
-    var fmt_picker_span = $('<span/>');
-
-    var fmt_picker = $('<select/>');
-    fmt_picker.addClass('mpl-toolbar-option ui-widget ui-widget-content');
-    fmt_picker_span.append(fmt_picker);
-    nav_element.append(fmt_picker_span);
-    this.format_dropdown = fmt_picker[0];
-
-    for (var ind in mpl.extensions) {
-        var fmt = mpl.extensions[ind];
-        var option = $(
-            '<option/>', {selected: fmt === mpl.default_extension}).html(fmt);
-        fmt_picker.append(option)
-    }
-
-    // Add hover states to the ui-buttons
-    $( ".ui-button" ).hover(
-        function() { $(this).addClass("ui-state-hover");},
-        function() { $(this).removeClass("ui-state-hover");}
-    );
-
-    var status_bar = $('<span class="mpl-message"/>');
-    nav_element.append(status_bar);
-    this.message = status_bar[0];
-}
-
-mpl.figure.prototype.request_resize = function(x_pixels, y_pixels) {
-    // Request matplotlib to resize the figure. Matplotlib will then trigger a resize in the client,
-    // which will in turn request a refresh of the image.
-    this.send_message('resize', {'width': x_pixels, 'height': y_pixels});
-}
-
-mpl.figure.prototype.send_message = function(type, properties) {
-    properties['type'] = type;
-    properties['figure_id'] = this.id;
-    this.ws.send(JSON.stringify(properties));
-}
-
-mpl.figure.prototype.send_draw_message = function() {
-    if (!this.waiting) {
-        this.waiting = true;
-        this.ws.send(JSON.stringify({type: "draw", figure_id: this.id}));
-    }
-}
-
-
-mpl.figure.prototype.handle_save = function(fig, msg) {
-    var format_dropdown = fig.format_dropdown;
-    var format = format_dropdown.options[format_dropdown.selectedIndex].value;
-    fig.ondownload(fig, format);
-}
-
-
-mpl.figure.prototype.handle_resize = function(fig, msg) {
-    var size = msg['size'];
-    if (size[0] != fig.canvas.width || size[1] != fig.canvas.height) {
-        fig._resize_canvas(size[0], size[1]);
-        fig.send_message("refresh", {});
-    };
-}
-
-mpl.figure.prototype.handle_rubberband = function(fig, msg) {
-    var x0 = msg['x0'] / mpl.ratio;
-    var y0 = (fig.canvas.height - msg['y0']) / mpl.ratio;
-    var x1 = msg['x1'] / mpl.ratio;
-    var y1 = (fig.canvas.height - msg['y1']) / mpl.ratio;
-    x0 = Math.floor(x0) + 0.5;
-    y0 = Math.floor(y0) + 0.5;
-    x1 = Math.floor(x1) + 0.5;
-    y1 = Math.floor(y1) + 0.5;
-    var min_x = Math.min(x0, x1);
-    var min_y = Math.min(y0, y1);
-    var width = Math.abs(x1 - x0);
-    var height = Math.abs(y1 - y0);
-
-    fig.rubberband_context.clearRect(
-        0, 0, fig.canvas.width, fig.canvas.height);
-
-    fig.rubberband_context.strokeRect(min_x, min_y, width, height);
-}
-
-mpl.figure.prototype.handle_figure_label = function(fig, msg) {
-    // Updates the figure title.
-    fig.header.textContent = msg['label'];
-}
-
-mpl.figure.prototype.handle_cursor = function(fig, msg) {
-    var cursor = msg['cursor'];
-    switch(cursor)
-    {
-    case 0:
-        cursor = 'pointer';
-        break;
-    case 1:
-        cursor = 'default';
-        break;
-    case 2:
-        cursor = 'crosshair';
-        break;
-    case 3:
-        cursor = 'move';
-        break;
-    }
-    fig.rubberband_canvas.style.cursor = cursor;
-}
-
-mpl.figure.prototype.handle_message = function(fig, msg) {
-    fig.message.textContent = msg['message'];
-}
-
-mpl.figure.prototype.handle_draw = function(fig, msg) {
-    // Request the server to send over a new figure.
-    fig.send_draw_message();
-}
-
-mpl.figure.prototype.handle_image_mode = function(fig, msg) {
-    fig.image_mode = msg['mode'];
-}
-
-mpl.figure.prototype.updated_canvas_event = function() {
-    // Called whenever the canvas gets updated.
-    this.send_message("ack", {});
-}
-
-// A function to construct a web socket function for onmessage handling.
-// Called in the figure constructor.
-mpl.figure.prototype._make_on_message_function = function(fig) {
-    return function socket_on_message(evt) {
-        if (evt.data instanceof Blob) {
-            /* FIXME: We get "Resource interpreted as Image but
-             * transferred with MIME type text/plain:" errors on
-             * Chrome.  But how to set the MIME type?  It doesn't seem
-             * to be part of the websocket stream */
-            evt.data.type = "image/png";
-
-            /* Free the memory for the previous frames */
-            if (fig.imageObj.src) {
-                (window.URL || window.webkitURL).revokeObjectURL(
-                    fig.imageObj.src);
-            }
-
-            fig.imageObj.src = (window.URL || window.webkitURL).createObjectURL(
-                evt.data);
-            fig.updated_canvas_event();
-            fig.waiting = false;
-            return;
-        }
-        else if (typeof evt.data === 'string' && evt.data.slice(0, 21) == "data:image/png;base64") {
-            fig.imageObj.src = evt.data;
-            fig.updated_canvas_event();
-            fig.waiting = false;
-            return;
-        }
-
-        var msg = JSON.parse(evt.data);
-        var msg_type = msg['type'];
-
-        // Call the  "handle_{type}" callback, which takes
-        // the figure and JSON message as its only arguments.
-        try {
-            var callback = fig["handle_" + msg_type];
-        } catch (e) {
-            console.log("No handler for the '" + msg_type + "' message type: ", msg);
-            return;
-        }
-
-        if (callback) {
-            try {
-                // console.log("Handling '" + msg_type + "' message: ", msg);
-                callback(fig, msg);
-            } catch (e) {
-                console.log("Exception inside the 'handler_" + msg_type + "' callback:", e, e.stack, msg);
-            }
-        }
-    };
-}
-
-// from http://stackoverflow.com/questions/1114465/getting-mouse-location-in-canvas
-mpl.findpos = function(e) {
-    //this section is from http://www.quirksmode.org/js/events_properties.html
-    var targ;
-    if (!e)
-        e = window.event;
-    if (e.target)
-        targ = e.target;
-    else if (e.srcElement)
-        targ = e.srcElement;
-    if (targ.nodeType == 3) // defeat Safari bug
-        targ = targ.parentNode;
-
-    // jQuery normalizes the pageX and pageY
-    // pageX,Y are the mouse positions relative to the document
-    // offset() returns the position of the element relative to the document
-    var x = e.pageX - $(targ).offset().left;
-    var y = e.pageY - $(targ).offset().top;
-
-    return {"x": x, "y": y};
-};
-
-/*
- * return a copy of an object with only non-object keys
- * we need this to avoid circular references
- * http://stackoverflow.com/a/24161582/3208463
- */
-function simpleKeys (original) {
-  return Object.keys(original).reduce(function (obj, key) {
-    if (typeof original[key] !== 'object')
-        obj[key] = original[key]
-    return obj;
-  }, {});
-}
-
-mpl.figure.prototype.mouse_event = function(event, name) {
-    var canvas_pos = mpl.findpos(event)
-
-    if (name === 'button_press')
-    {
-        this.canvas.focus();
-        this.canvas_div.focus();
-    }
-
-    var x = canvas_pos.x * mpl.ratio;
-    var y = canvas_pos.y * mpl.ratio;
-
-    this.send_message(name, {x: x, y: y, button: event.button,
-                             step: event.step,
-                             guiEvent: simpleKeys(event)});
-
-    /* This prevents the web browser from automatically changing to
-     * the text insertion cursor when the button is pressed.  We want
-     * to control all of the cursor setting manually through the
-     * 'cursor' event from matplotlib */
-    event.preventDefault();
-    return false;
-}
-
-mpl.figure.prototype._key_event_extra = function(event, name) {
-    // Handle any extra behaviour associated with a key event
-}
-
-mpl.figure.prototype.key_event = function(event, name) {
-
-    // Prevent repeat events
-    if (name == 'key_press')
-    {
-        if (event.which === this._key)
-            return;
-        else
-            this._key = event.which;
-    }
-    if (name == 'key_release')
-        this._key = null;
-
-    var value = '';
-    if (event.ctrlKey && event.which != 17)
-        value += "ctrl+";
-    if (event.altKey && event.which != 18)
-        value += "alt+";
-    if (event.shiftKey && event.which != 16)
-        value += "shift+";
-
-    value += 'k';
-    value += event.which.toString();
-
-    this._key_event_extra(event, name);
-
-    this.send_message(name, {key: value,
-                             guiEvent: simpleKeys(event)});
-    return false;
-}
-
-mpl.figure.prototype.toolbar_button_onclick = function(name) {
-    if (name == 'download') {
-        this.handle_save(this, null);
-    } else {
-        this.send_message("toolbar_button", {name: name});
-    }
-};
-
-mpl.figure.prototype.toolbar_button_onmouseover = function(tooltip) {
-    this.message.textContent = tooltip;
-};
-mpl.toolbar_items = [["Home", "Reset original view", "fa fa-home icon-home", "home"], ["Back", "Back to  previous view", "fa fa-arrow-left icon-arrow-left", "back"], ["Forward", "Forward to next view", "fa fa-arrow-right icon-arrow-right", "forward"], ["", "", "", ""], ["Pan", "Pan axes with left mouse, zoom with right", "fa fa-arrows icon-move", "pan"], ["Zoom", "Zoom to rectangle", "fa fa-square-o icon-check-empty", "zoom"], ["", "", "", ""], ["Download", "Download plot", "fa fa-floppy-o icon-save", "download"]];
-
-mpl.extensions = ["eps", "jpeg", "pdf", "png", "ps", "raw", "svg", "tif"];
-
-mpl.default_extension = "png";var comm_websocket_adapter = function(comm) {
-    // Create a "websocket"-like object which calls the given IPython comm
-    // object with the appropriate methods. Currently this is a non binary
-    // socket, so there is still some room for performance tuning.
-    var ws = {};
-
-    ws.close = function() {
-        comm.close()
-    };
-    ws.send = function(m) {
-        //console.log('sending', m);
-        comm.send(m);
-    };
-    // Register the callback with on_msg.
-    comm.on_msg(function(msg) {
-        //console.log('receiving', msg['content']['data'], msg);
-        // Pass the mpl event to the overridden (by mpl) onmessage function.
-        ws.onmessage(msg['content']['data'])
-    });
-    return ws;
-}
-
-mpl.mpl_figure_comm = function(comm, msg) {
-    // This is the function which gets called when the mpl process
-    // starts-up an IPython Comm through the "matplotlib" channel.
-
-    var id = msg.content.data.id;
-    // Get hold of the div created by the display call when the Comm
-    // socket was opened in Python.
-    var element = $("#" + id);
-    var ws_proxy = comm_websocket_adapter(comm)
-
-    function ondownload(figure, format) {
-        window.open(figure.imageObj.src);
-    }
-
-    var fig = new mpl.figure(id, ws_proxy,
-                           ondownload,
-                           element.get(0));
-
-    // Call onopen now - mpl needs it, as it is assuming we've passed it a real
-    // web socket which is closed, not our websocket->open comm proxy.
-    ws_proxy.onopen();
-
-    fig.parent_element = element.get(0);
-    fig.cell_info = mpl.find_output_cell("<div id='" + id + "'></div>");
-    if (!fig.cell_info) {
-        console.error("Failed to find cell for figure", id, fig);
-        return;
-    }
-
-    var output_index = fig.cell_info[2]
-    var cell = fig.cell_info[0];
-
-};
-
-mpl.figure.prototype.handle_close = function(fig, msg) {
-    var width = fig.canvas.width/mpl.ratio
-    fig.root.unbind('remove')
-
-    // Update the output cell to use the data from the current canvas.
-    fig.push_to_output();
-    var dataURL = fig.canvas.toDataURL();
-    // Re-enable the keyboard manager in IPython - without this line, in FF,
-    // the notebook keyboard shortcuts fail.
-    IPython.keyboard_manager.enable()
-    $(fig.parent_element).html('<img src="' + dataURL + '" width="' + width + '">');
-    fig.close_ws(fig, msg);
-}
-
-mpl.figure.prototype.close_ws = function(fig, msg){
-    fig.send_message('closing', msg);
-    // fig.ws.close()
-}
-
-mpl.figure.prototype.push_to_output = function(remove_interactive) {
-    // Turn the data on the canvas into data in the output cell.
-    var width = this.canvas.width/mpl.ratio
-    var dataURL = this.canvas.toDataURL();
-    this.cell_info[1]['text/html'] = '<img src="' + dataURL + '" width="' + width + '">';
-}
-
-mpl.figure.prototype.updated_canvas_event = function() {
-    // Tell IPython that the notebook contents must change.
-    IPython.notebook.set_dirty(true);
-    this.send_message("ack", {});
-    var fig = this;
-    // Wait a second, then push the new image to the DOM so
-    // that it is saved nicely (might be nice to debounce this).
-    setTimeout(function () { fig.push_to_output() }, 1000);
-}
-
-mpl.figure.prototype._init_toolbar = function() {
-    var fig = this;
-
-    var nav_element = $('<div/>')
-    nav_element.attr('style', 'width: 100%');
-    this.root.append(nav_element);
-
-    // Define a callback function for later on.
-    function toolbar_event(event) {
-        return fig.toolbar_button_onclick(event['data']);
-    }
-    function toolbar_mouse_event(event) {
-        return fig.toolbar_button_onmouseover(event['data']);
-    }
-
-    for(var toolbar_ind in mpl.toolbar_items){
-        var name = mpl.toolbar_items[toolbar_ind][0];
-        var tooltip = mpl.toolbar_items[toolbar_ind][1];
-        var image = mpl.toolbar_items[toolbar_ind][2];
-        var method_name = mpl.toolbar_items[toolbar_ind][3];
-
-        if (!name) { continue; };
-
-        var button = $('<button class="btn btn-default" href="#" title="' + name + '"><i class="fa ' + image + ' fa-lg"></i></button>');
-        button.click(method_name, toolbar_event);
-        button.mouseover(tooltip, toolbar_mouse_event);
-        nav_element.append(button);
-    }
-
-    // Add the status bar.
-    var status_bar = $('<span class="mpl-message" style="text-align:right; float: right;"/>');
-    nav_element.append(status_bar);
-    this.message = status_bar[0];
-
-    // Add the close button to the window.
-    var buttongrp = $('<div class="btn-group inline pull-right"></div>');
-    var button = $('<button class="btn btn-mini btn-primary" href="#" title="Stop Interaction"><i class="fa fa-power-off icon-remove icon-large"></i></button>');
-    button.click(function (evt) { fig.handle_close(fig, {}); } );
-    button.mouseover('Stop Interaction', toolbar_mouse_event);
-    buttongrp.append(button);
-    var titlebar = this.root.find($('.ui-dialog-titlebar'));
-    titlebar.prepend(buttongrp);
-}
-
-mpl.figure.prototype._root_extra_style = function(el){
-    var fig = this
-    el.on("remove", function(){
-	fig.close_ws(fig, {});
-    });
-}
-
-mpl.figure.prototype._canvas_extra_style = function(el){
-    // this is important to make the div 'focusable
-    el.attr('tabindex', 0)
-    // reach out to IPython and tell the keyboard manager to turn it's self
-    // off when our div gets focus
-
-    // location in version 3
-    if (IPython.notebook.keyboard_manager) {
-        IPython.notebook.keyboard_manager.register_events(el);
-    }
-    else {
-        // location in version 2
-        IPython.keyboard_manager.register_events(el);
-    }
-
-}
-
-mpl.figure.prototype._key_event_extra = function(event, name) {
-    var manager = IPython.notebook.keyboard_manager;
-    if (!manager)
-        manager = IPython.keyboard_manager;
-
-    // Check for shift+enter
-    if (event.shiftKey && event.which == 13) {
-        this.canvas_div.blur();
-        event.shiftKey = false;
-        // Send a "J" for go to next cell
-        event.which = 74;
-        event.keyCode = 74;
-        manager.command_mode();
-        manager.handle_keydown(event);
-    }
-}
-
-mpl.figure.prototype.handle_save = function(fig, msg) {
-    fig.ondownload(fig, null);
-}
-
-
-mpl.find_output_cell = function(html_output) {
-    // Return the cell and output element which can be found *uniquely* in the notebook.
-    // Note - this is a bit hacky, but it is done because the "notebook_saving.Notebook"
-    // IPython event is triggered only after the cells have been serialised, which for
-    // our purposes (turning an active figure into a static one), is too late.
-    var cells = IPython.notebook.get_cells();
-    var ncells = cells.length;
-    for (var i=0; i<ncells; i++) {
-        var cell = cells[i];
-        if (cell.cell_type === 'code'){
-            for (var j=0; j<cell.output_area.outputs.length; j++) {
-                var data = cell.output_area.outputs[j];
-                if (data.data) {
-                    // IPython >= 3 moved mimebundle to data attribute of output
-                    data = data.data;
-                }
-                if (data['text/html'] == html_output) {
-                    return [cell, data, j];
-                }
-            }
-        }
-    }
-}
-
-// Register the function which deals with the matplotlib target/channel.
-// The kernel may be null if the page has been refreshed.
-if (IPython.notebook.kernel != null) {
-    IPython.notebook.kernel.comm_manager.register_target('matplotlib', mpl.mpl_figure_comm);
-}
-
-</script>
-</div>
-
-</div>
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-
-
-
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABQAAAAPACAYAAABq3NR5AAAAAXNSR0IArs4c6QAAQABJREFUeAHs3Qm4XdPdOOCVigwEMQTRpIbErIa/uVTEpygxtaVUEXxRTWsqotT4GdLUPBYVYm6rhpaYiSGoeawgUtQQY00hQSJ/v6379Nx7z705iXtv7jn7Xc9znL3XWnvttd510j75Ze29Ok3/MiWJAAECBAgQIECAAAECBAgQIECAAIG6FPhGXY7KoAgQIECAAAECBAgQIECAAAECBAgQyAQEAP0QCBAgQIAAAQIECBAgQIAAAQIECNSxgABgHU+uoREgQIAAAQIECBAgQIAAAQIECBAQAPQbIECAAAECBAgQIECAAAECBAgQIFDHAgKAdTy5hkaAAAECBAgQIECAAAECBAgQIEBAANBvgAABAgQIECBAgAABAgQIECBAgEAdCwgA1vHkGhoBAgQIECBAgAABAgQIECBAgAABAUC/AQIECBAgQIAAAQIECBAgQIAAAQJ1LCAAWMeTa2gECBAgQIAAAQIECBAgQIAAAQIEBAD9BggQIECAAAECBAgQIECAAAECBAjUsYAAYB1PrqERIECAAAECBAgQIECAAAECBAgQEAD0GyBAgAABAgQIECBAgAABAgQIECBQxwICgHU8uYZGgAABAgQIECBAgAABAgQIECBAQADQb4AAAQIECBAgQIAAAQIECBAgQIBAHQsIANbx5BoaAQIECBAgQIAAAQIECBAgQIAAAQFAvwECBAgQIECAAAECBAgQIECAAAECdSwgAFjHk2toBAgQIECAAAECBAgQIECAAAECBAQA/QYIECBAgAABAgQIECBAgAABAgQI1LGAAGAdT66hESBAgAABAgQIECBAgAABAgQIEBAA9BsgQIAAAQIECBAgQIAAAQIECBAgUMcCAoB1PLmGRoAAAQIECBAgQIAAAQIECBAgQEAA0G+AAAECBAgQIECAAAECBAgQIECAQB0LCADW8eQaGgECBAgQIECAAAECBAgQIECAAAEBQL8BAgQIECBAgAABAgQIECBAgAABAnUsIABYx5NraAQIECBAgAABAgQIECBAgAABAgQEAP0GCBAgQIAAAQIECBAgQIAAAQIECNSxgABgHU+uoREgQIAAAQIECBAgQIAAAQIECBAQAPQbIECAAAECBAgQIECAAAECBAgQIFDHAgKAdTy5hkaAAAECBAgQIECAAAECBAgQIEBAANBvgAABAgQIECBAgAABAgQIECBAgEAdCwgA1vHkGhoBAgQIECBAgAABAgQIECBAgAABAUC/AQIECBAgQIAAAQIECBAgQIAAAQJ1LCAAWMeTa2gECBAgQIAAAQIECBAgQIAAAQIEBAD9BggQIECAAAECBAgQIECAAAECBAjUsYAAYB1PrqERIECAAAECBAgQIECAAAECBAgQEAD0GyBAgAABAgQIECBAgAABAgQIECBQxwICgHU8uYZGgAABAgQIECBAgAABAgQIECBAQADQb4AAAQIECBAgQIAAAQIECBAgQIBAHQsIANbx5BoaAQIECBAgQIAAAQIECBAgQIAAAQFAvwECBAgQIECAAAECBAgQIECAAAECdSwgAFjHk2toBAgQIECAAAECBAgQIECAAAECBAQA/QYIECBAgAABAgQIECBAgAABAgQI1LGAAGAdT66hESBAgAABAgQIECBAgAABAgQIEBAA9BsgQIAAAQIECBAgQIAAAQIECBAgUMcCAoB1PLmGRoAAAQIECBAgQIAAAQIECBAgQEAA0G+AAAECBAgQIECAAAECBAgQIECAQB0LCADW8eQaGgECBAgQIECAAAECBAgQIECAAAEBQL8BAgQIECBAgAABAgQIECBAgAABAnUsIABYx5NraAQIECBAgAABAgQIECBAgAABAgQEAP0GCBAgQIAAAQIECBAgQIAAAQIECNSxgABgHU+uoREgQIAAAQIECBAgQIAAAQIECBAQAPQbIECAAAECBAgQIECAAAECBAgQIFDHAgKAdTy5hkaAAAECBAgQIECAAAECBAgQIEBAANBvgAABAgQIECBAgAABAgQIECBAgEAdCwgA1vHkGhoBAgQIECBAgAABAgQIECBAgAABAUC/AQIECBAgQIAAAQIECBAgQIAAAQJ1LCAAWMeTa2gECBAgQIAAAQIECBAgQIAAAQIEBAD9BggQIECAAAECBAgQIECAAAECBAjUsYAAYB1PrqERIECAAAECBAgQIECAAAECBAgQEAD0GyBAgAABAgQIECBAgAABAgQIECBQxwICgHU8uYZGgAABAgQIECBAgAABAgQIECBAQADQb4AAAQIECBAgQIAAAQIECBAgQIBAHQsIANbx5BoaAQIECBAgQIAAAQIECBAgQIAAAQFAvwECBAgQIECAAAECBAgQIECAAAECdSwgAFjHk2toBAgQIECAAAECBAgQIECAAAECBAQA/QYIECBAgAABAgQIECBAgAABAgQI1LGAAGAdT66hESBAgAABAgQIECBAgAABAgQIEBAA9BsgQIAAAQIECBAgQIAAAQIECBAgUMcCAoB1PLmGRoAAAQIECBAgQIAAAQIECBAgQEAA0G+AAAECBAgQIECAAAECBAgQIECAQB0LCADW8eQaGgECBAgQIECAAAECBAgQIECAAAEBQL8BAgQIECBAgAABAgQIECBAgAABAnUsIABYx5NraAQIECBAgAABAgQIECBAgAABAgQEAP0GCBAgQIAAAQIECBAgQIAAAQIECNSxgABgHU+uoREgQIAAAQIECBAgQIAAAQIECBAQAPQbIECAAAECBAgQIECAAAECBAgQIFDHAgKAdTy5hkaAAAECBAgQIECAAAECBAgQIEBAANBvgAABAgQIECBAgAABAgQIECBAgEAdCwgA1vHkGhoBAgQIECBAgAABAgQIECBAgAABAUC/AQIECBAgQIAAAQIECBAgQIAAAQJ1LCAAWMeTa2gECBAgQIAAAQIECBAgQIAAAQIEBAD9BggQIECAAAECBAgQIECAAAECBAjUsYAAYB1PrqERIECAAAECBAgQIECAAAECBAgQEAD0GyBAgAABAgQIECBAgAABAgQIECBQxwICgHU8uYZGgAABAgQIECBAgAABAgQIECBAQADQb4AAAQIECBAgQIAAAQIECBAgQIBAHQsIANbx5BoaAQIECBAgQIAAAQIECBAgQIAAAQFAvwECBAgQIECAAAECBAgQIECAAAECdSwgAFjHk2toBAgQIECAAAECBAgQIECAAAECBAQA/QYIECBAgAABAgQIECBAgAABAgQI1LGAAGAdT66hESBAgAABAgQIECBAgAABAgQIEBAA9BsgQIAAAQIECBAgQIAAAQIECBAgUMcCAoB1PLmGRoAAAQIECBAgQIAAAQIECBAgQEAA0G+AAAECBAgQIECAAAECBAgQIECAQB0LCADW8eQaGgECBAgQIECAAAECBAgQIECAAAEBQL8BAgQIECBAgAABAgQIECBAgAABAnUsIABYx5NraAQIECBAgAABAgQIECBAgAABAgQEAP0GCBAgQIAAAQIECBAgQIAAAQIECNSxgABgHU+uoREgQIAAAQIECBAgQIAAAQIECBAQAPQbIECAAAECBAgQIECAAAECBAgQIFDHAgKAdTy5hkaAAAECBAgQIECAAAECBAgQIEBAANBvgAABAgQIECBAgAABAgQIECBAgEAdCwgA1vHkGhoBAgQIECBAgAABAgQIECBAgAABAUC/AQIECBAgQIAAAQIECBAgQIAAAQJ1LCAAWMeTa2gECBAgQIAAAQIECBAgQIAAAQIEBAD9BggQIECAAAECBAgQIECAAAECBAjUsYAAYB1PrqERIECAAAECBAgQIECAAAECBAgQEAD0GyBAgAABAgQIECBAgAABAgQIECBQxwICgHU8uYZGgAABAgQIECBAgAABAgQIECBAQADQb4AAAQIECBAgQIAAAQIECBAgQIBAHQsIANbx5BoaAQIECBAgQIAAAQIECBAgQIAAAQFAvwECBAgQIECAAAECBAgQIECAAAECdSzQuY7HZmgdWGDKlCnpqaeeynrYq1ev1Lmzn2IHni5dI0CAAAECBAgQIECAAIEaFZg6dWp6++23s95/+9vfTt26davRkej21xEQdfk6eq6dZYEI/q211lqzfL0LCRAgQIAAAQIECBAgQIAAgZkTePDBB9Oaa645cxepXRcCHgGui2k0CAIECBAgQIAAAQIECBAgQIAAAQKVBawArOwit40F4rHfPMW/QPTu3Ts/9U2AAAECBAgQIECAAAECBAi0ksDEiRNLT+CV/128lZrXTI0ICADWyETVWzfL3/kXwb8+ffrU2xCNhwABAgQIECBAgAABAgQIdCiB8r+Ld6iO6UybC3gEuArit956K11//fXpiCOOSN///vfTQgstlDp16pR9Bg8eXEULzVf55JNP0lJLLVVqb4kllmi+cllJXHfCCSdkUfwFFlgg9ejRIy2//PLpwAMPTP/617/KarZ8GHXjmrh27rnnTtFWvJvvxBNPTHEPiQABAgQIECBAgAABAgQIECBAoLYFrACsYv4WWWSRKmrNWpUIKr744oszdfGECRPSFltskZ577rkG1z377LMpPueff366/PLL0+abb96gvPHJ6NGj00477ZQ++OCDUlEE/R566KHsE+3ccMMNWYCyVMEBAQIECBAgQIAAAQIECBAgQIBATQlYATiT09W3b9+0ySabzORVlas/9thj6dRTT8224J5nnnkqV2qUO2nSpDRo0KBS8G/IkCHp9ttvT/fdd1867rjjspWAEdDbbrvt0pNPPtno6v+ePvHEE2n77bfPgn+xejCujTairWgzUgQYI9AY95QIECBAgAABAgQIECBAgAABAgRqU8AKwCrmLVbpxTbZ8YnVgC+99FJacsklq7iy+SrTpk3LAm3xfeSRR6aRI0emjz76qPkL/lMSj+bGKr9Iv/vd79JBBx30n5KU1l133TRw4MC0wQYbZI/v7rfffumOO+4olZcfRFms9ovn/2+55Zbs2rx8o402SksvvXQaNmxYdq+TTz45e/w5L/dNgAABAgQIECBAgAABAgQIECBQOwJWAFYxV0cffXS26q41HwU+7bTT0iOPPJKWXXbZdPDBB1fRi5Q+//zzFNdFinf2HXDAAU2uiyDgHnvskeWPGTMmu0fjSvGI75133pllR924pnGKtuMekWKVYtxbIkCAAAECBAgQIECAAAECBAgQqD0BAcDZMGcvv/xyaUXd73//+9SlS5eqehFBu/fffz+ru+uuu6ZvfKPy9JVvTHL11Vc3afvaa68t5e22226l4/KDaHuXXXbJst57771SwLC8jmMCBAgQIECAAAECBAgQIECAAIGOL1A5gtTx+13TPRw6dGj6+OOP084775w9slvtYO65555S1QEDBpSOGx+sscYa2Y6+kT927NjGxSlvJ3b9XX311ZuU5xnl96jUTl7PNwECBAgQIECAAAECBAgQIECAQMcVEABs57n54x//mO2sO//886d4n9/MpHHjxpWqL7fccqXjxgfxXr9+/fpl2eXX5PXyvP79+2fvAMzzG3+X3yO/pnEd5wQIECBAgAABAgQIECBAgAABAh1bwCYg7Tg/8ShtbL4R6be//W1aeOGFZ+rur7zySlY/Vu717NmzxWtjt+LYBfjtt99On376aeratWtWf8qUKemdd97Jjvv06dNiGxGkjHvFasX83i1eUFb46quvlp01PZw4cWLTTDkECBAgQIAAAQIECBAgQIAAAQKtLiAA2OqkzTcYO/a++eab2aYbQ4YMab5iMyX5LsE9evRopsZ/syNwl6dJkyaVAoB5G1FWbTsRAIw2ZiZFAFIiQIAAAQIECBAgQIAAAQIECBCY/QICgO00B3fffXe64IILskduzznnnNSpU6eZvnOs3otUzaYh+Yq/qD958uT4ylLeRpzMTDvlbXzV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acUVV0zzzDNPVhYbjeQp32SkpV2Av/jii3TppZemzTffPC266KKpS5cuqVevXmngwIHp7LPPTp999lneXJPvaDe/RxR+8MEH6ZhjjkmrrbZa6tmzZ1Y2atSoJtfJIEBg1gW8A3DW7VxJgAABAgQIECBAgAABAgQ6jEDnzv/9K/60adMq9uvvf/972nLLLdM777xTsbyazH//+99pq622Svfee2+D6tFmBBLjc+aZZ6ZYhbj44os3qNP4ZPz48WmTTTZJL730UuMi5wQItKLAf//XoRUb1RQBAgQIECBAgAABAgQIECDQvgJPPvlk6YaLLbZY6Tg/mDRpUvrhD3+YYufg3/zmN+l73/temmuuudJTTz2VevfunVdr8TsCi4MGDUr3339/Vm/AgAHpl7/8ZVpyySXT66+/ni644IJ07bXXZhuS/M///E+2QUmPHj2abfNHP/pReu2119Lee++dBRXnn3/+FEHBGQUOm21QAQECFQUEACuyyCRAgAABAgQIECBAgAABArUlcPzxx5c6vOGGG5aO84N33303RTBu7NixaZVVVsmz05prrlk6ntHBOeecUwr+7bLLLike1Y3HeSOtvvrq2erCCC5GXyZMmJA92jtixIhmm3366afTTTfdlAUj80rRjkSAQOsKCAC2rqfWCBAgQIAAAQK1JTBmeNv1d+Ahbde2lgkQIEAgE5g8eXK2ym748OHpuuuuy/LmnXfetNdee1UUGjZsWIPgX8VKLWSeddZZWelCCy2UPeabB//KL/m///u/dPXVV6dnn302/eEPf0hx3rVr1/IqpeN4P2GsRJQIEGhbAZuAtK2v1gkQIECAAAECBAgQIECAQKsJHH300aUNNCL4Fo/wfuc732kQ/LvqqquyDTkq3XSnnXaqlF1VXjziO27cuKzu9ttvn20gUunCOeaYI+22225Z0XvvvZceffTRStWyvK/Tn2YbVUCAQBMBAcAmJDIIECBAgAABAgQIECBAgEBtCfTt2zd7j168z2/jjTeu2Pl4/HeppZaqWFZNZjyum6e11147P6z4XV5efl3jyiuvvHLjLOcECLSBgEeA2wBVkwQIECBAgAABAgQIECBAoC0Efv7zn6ehQ4eWmu7WrVtacMEFU2yeMaPUs2fPGVVpsTx2/83TIosskh9W/F500UVL+eXXlTL/c1BNvxtf45wAgZkXEACceTNXECBAgAABAgQIECBAgACB2SKw8MILp5VWWmmW7h2P5rZWqvTuv/K2p0+fXn7a7HFr9qnZmyggQCB5BNiPgAABAgQIECBAgAABAgQIEJihwAILLFCq88Ybb5SOKx28+eabpezy60qZDggQaFcBAcB25XYzAgQIECBAgAABAgQIECBQmwLlKw8feOCBFgfx4IMPlsrLrytlOiBAoF0FBADbldvNCBAgQIAAAQIECBAgQIBAbQostthiafnll886f+WVV6aPPvqo4kCmTZuWRo0alZXFO/7+3//7fxXrySRAoP0EBADbz9qdCBAgQIAAAQIECBAgQIBATQv84he/yPr/9ttvZ7sOV3rX39FHH52eeeaZrN6QIUNS165da3rMOk+gHgRsAlIPs2gMBAgQIECAAAECBAgQIECgHQT22muvdNlll6X7778/XXTRRenll19OERRcaqml0sSJE9MFF1yQrr766qwn/fr1S4cffng79MotCBCYkYAA4IyElBMgQIAAAQIECBAgQIAAAQKZQOzae/3116etttoq3XvvvenOO+/MPo154lHhG2+8MfXo0aNxkXMCBGaDgEeAZwO6WxIgQIAAAQIECBAgQIAAgVoViF1977777nTJJZekzTbbLC2yyCJpzjnnTAsuuGDacMMN05lnnpkef/zxtPjii9fqEPWbQN0JdPryef3pdTcqA+rwAq+++mrq27dv1s9XXnkl9enTp8P3WQcJECBAgEBdCowZ3nbDGnhI27WtZQIEZpvA+PHj09SpU1Pnzp3T0ksvPdv64cYEiigwK3/+/P27iL+UpmO2ArCpiRwCBAgQIECAAAECBAgQIECAAAECdSMgAFg3U2kgBAgQIECAAAECBAgQIECAAAECBJoKCAA2NZFDgAABAgQIECBAgAABAgQIECBAoG4EBADrZioNhAABAgQIECBAgAABAgQIECBAgEBTAQHApiZyCBAgQIAAAQIECBAgQIAAAQIECNSNgABg3UylgRAgQIAAAQIECBAgQIAAAQIECBBoKiAA2NREDgECBAgQIECAAAECBAgQIECAAIG6ERAArJupNBACBAgQIECAAAECBAgQIECAAAECTQUEAJuayCFAgAABAgQIECBAgAABAgQIECBQNwICgHUzlQZCgAABAgQIECBAgAABAgQIECBAoKmAAGBTEzkECBAgQIAAAQIECBAgQIAAAQIE6kZAALBuptJACBAgQIAAAQIECBAgQIAAAQIECDQVEABsaiKHAAECBAgQIECAAAECBAgQIECAQN0ICADWzVQaCAECBAgQIECAAAECBAgQIECAAIGmAgKATU3kECBAgAABAgQIECBAgAABAgQIEKgbAQHAuplKAyFAgAABAgQIECBAgAABAgQIECDQVEAAsKmJHAIECBAgQIAAAQIECBAgQIAAAQJ1IyAAWDdTaSAECBAgQIAAAQIECBAgQIAAAQIEmgoIADY1kUOAAAECBAgQIECAAAECBAgQIECgbgQEAOtmKg2EAAECBAgQIECAAAECBAgQmBmBn/70p6lTp06pf//+M3OZugRqTkAAsOamTIcJECBAgAABAgQIECBAoEgCd955ZxakikBV40/37t1T375906BBg9L555+fpkyZUiQaYyVAoEoBAcAqoVQjQIAAAQIECBAgQIAAAQIdTSACfq+++moaPXp0GjJkSFp11VXT888/32G6+cILL5SClpdeemmH6ZeOECiaQOeiDdh4CRAgQIAAAQIECBAgQKAdBcYMb8ebzYZbDTykXW/685//PA0dOrR0z08++SQ9/vjj6dRTT03jxo1Lzz33XNpss83SP/7xjxSrA6WWBSIoKTDZspHS+hCwArA+5tEoCBAgQIAAAQIECBAgQKAAAgsvvHBaaaWVSp+11lor7bnnnumRRx5JcRzpxRdfTCNHjiyAhiESIFCtgABgtVLqESBAgAABAgQIECBAgACBDioQq/2OO+64Uu9uvPHG0rEDAgQIeATYb4AAAQIECBAgUAsCtfgIXVv1uZ0ft6uFn4c+EiBAIATWWWedEsTLL79cOs4PPvroo3TmmWema6+9No0fPz59/PHHqVevXmnddddNu+22W9p8883zqhW/H3rooXT22WensWPHptdeey198cUX2fWLLLJIdu9NN90024wkNiqZOnVqmnPOORu0s/POO6f4lKdjjjkmHXbYYeVZ2XE8zhz3uuOOO9Irr7yStde7d+80YMCAtM8++2TvOmxy0ZcZt912W/re976XFd1zzz3pO9/5Trrggguyx3yfeeaZ9M4776Tdd9892zAlKsUuwJdddlnq169fivcVNpeeeOKJzG7MmDHp9ddfT3PMMUf61re+lWLM++23X3Zc6dpoc+mll86KLrnkkux+f/nLX7IVmtHmW2+9lTbccMOs35Wul0egtQQEAFtLUjsECBAgQIAAAQIECBAgQGA2CnTu/N+/4k+bNq1BT+IR4dgp+I033miQH4G8CEjFZ7vttksRpOratWuDOnFy4oknpmHDhqXp06c3KIsNSOIT7Z911llp8uTJqVu3bg3qzOzJUUcdlY499tjUeAz//Oc/U3xGjRqVjj766HT44Ye32HT0ZeONN04RtPs6KYKU0acIeJanCCjG5/e//30W0PvJT35SXtzkOK6POldccUWTMhkE2lrgv//r0NZ30j4BAgQIECBAgAABAgQIECDQZgJPPvlkqe3FFlusdPyvf/0rC4S9//772Y68sQLuxz/+cZp//vmzAFYE95566ql05ZVXZqv2YkVceXr00UdLwb9YKfeLX/wirbLKKmmBBRZIkyZNynYdjiDbNddcU7osgpHRZqzey1cWDh8+PAtClip9eRCrB8vToYcemqJepPXXXz9bmbjiiiumaO/ZZ59NZ5xxRnrggQfSEUcckRZaaKEUm6I0lw488MAUJttss03adddds1V6EQCNlY/VptNPPz27V9SP9y/++te/zlYVfv755+nWW2/NAqOxEUusJIz+bLLJJs02fdJJJ2X9iVWM0e/+/fun9957L8X8SATaWkAAsK2FtU+AAAECBAgQIECAAAECBNpB4Pjjjy/dJR4rzdO+++6bIvgX6cILL8yCYXnZGmuskbbffvvsUda77747XX755Wnw4MGlx2ijXqwOjJV/8847b7rvvvuyQFh+fXxHoC6CinGP8tWDsVlJ+WrAPn36ZJuXlF9bfnz//fen3/72t1lWrLg78sgjy4vT6quvnnbYYYfsMeJYRRfBuJ122inrV4OK/zmJ4F+sFIxg4aykN998Mx188MHZpdH36F985ynGveWWW2aPJUcQcMiQIWnChAlZsDKvU/4d/YlHrWODlnhMWiLQngI2AWlPbfciQIAAAQIECBAgQIAAAQKtKBCPuUZgaquttkp//etfs5YjULfXXntlx7EC729/+1t2vMUWWzQI/uXdiCBdBAbjvXaR4j2B5Sl/bHjZZZdtEvwrr9ezZ8+vFdgaMWJEFmiM3YwbB//y+0QfYxVgvF/www8/TFdffXVe1OR7+eWXr/h+wSYVm8mIQN2UKVOy0lNOOaVB8C+/JAKo8Wh0pFjJd9111+VFTb5jxWT0XfCvCY2MdhAQAGwHZLcgQIAAAQIECBAgQIAAAQKtIRAr2iKAlH/mmmuu7JHUPPAUwb+rrroq25wj7heP5ubvrttjjz2a7cJSSy2VNtpoo6y8/JrIiM03IsUjvfGuv7ZIn376abr55puzpuNdhC2lBRdcMMVjwZEi+NlcitWC3/jGrIc9YkORSBG4i8eIm0ux8i9P+TX5efn31ltvneaee+7yLMcE2k1g1v8ktFsX3YgAAQIECBAgQIAAAQIECBBoSaBv375p7733zoJ0sfFFnp5++un8MK299tql40oHeXnsFly+i3BsXBHv4IvVcLHTcKw2PPfcc7P3BzbeFKRSu9XkRT/z1XYHHXRQKcCZBzobfz/++ONZs/nqxEr3WHnllStlV52X28Wjx+UbrDRuIN63mD8anF/TuE6cf93+VGpTHoFqBbwDsFop9QgQIECAAAECBAgQIECAwGwWiM0jhg4dWupFPL4bK+JiQ49K6d///ncpu/GGG6WC/xwsuuiipay4bskll8zOY7VdvBtwzz33zN7zF6sN8xWHvXr1Sptttln62c9+ltZbb73S9TN78NZbb83sJVn9ePdec6k5k+bqN86PDToizcgt6oRd7IZc7h355enr9qe8LccEZlZAAHBmxdQnQIAAAQIECBAgQIAAAQKzSSB2oo3NNdoitbSaLx7LjR1u//jHP2aP6t5zzz3pnXfeSW+//Xa65JJLsk88YnzeeefN0mO306ZNKw3p5JNPbrAJSamgwkGPHj0q5H6Vlb/TsNkKVRbE6sMZpZbs8mtbqz95e74JzIyAAODMaKlLgAABAgQIECBAgAABAgRqSCDeX5en2NU2HldtLkV5nsqvy/Pmm2++bKVfrPaLgNczzzyTbTASG1tMnDgx2912tdVWS7/4xS/yS6r+jlWMeZo6dWqbBTnze1TzHSv2IsDZ0mPGeTu5XSW3vI5vArNTwDsAZ6e+exMgQIAAAQIECBAgQIAAgTYUKF8t+MADD7R4pwcffDArn2eeedLiiy/eYt1YFRePBh9yyCHZRhzdu3fP6v/5z39ucF01q+figuhn/p69W265pUEbs+skt4uNTyIo2Vx6/fXXs8d/ozy/prm68gnMLgEBwNkl774ECBAgQIAAAQIECBAgQKCNBQYOHFh6JHfkyJHN3u3FF19Md9xxR1Zefk2zF5QVRLCwf//+WU48Flye4h2FeYqdfptLEXSM+0a6/fbb06OPPtpc1XbLzzdTiff6XXvttc3et9w1v6bZygoIzCYBAcDZBO+2BAgQIECAAAECBAgQIECgrQVid+DYtTfS6NGj08UXX9zklhGY23333Uur3H75y182qHPNNdekDz74oEFe+UnsGPz8889nWfnGIXl5bBKSr+ybMGFCnl3x+ze/+U2WH48Xb7/99imCks2leGfgpZdemj163Fydr5sfJnkA81e/+lV67bXXmjQZgcoRI0Zk+d/61rfSlltu2aSODAIdQcA7ADvCLOgDAQIECBAgQIAAAQIECBBoI4HTTjst3XnnndkOvrvttluKDTwiwBbvqxs3blw64YQT0pNPPpnd/Sc/+UmTDThOOumktPPOO6ctttgibbTRRmm55ZZL8T7A2CX3oYceSqeffnrKV/fFLsXlqUuXLmn11VdP8fjxH/7wh7TyyiunVVZZJc0555xZtfIdjAcMGJAiCHjcccelCBZG3SFDhmT9iV12p0yZkiLYeN9996W//OUvWfAv+t+7d+/yW7bacdwzgnv77rtveuWVV7Jx/PrXv07rrrtuFiy97bbbMruPP/44xaPOMb482NlqndAQgVYSEABsJUjNECBAgAABAgQIECBAgACBjigQK9NuvfXWbHVabGhx/vnnZ5/GfY2dfi+44ILG2dl5BLni/X6N3/GXV44dbocPH54FCfO8/PvQQw9N22yzTbZr8I477phnZ9/HHHNMOuyww0p5xx57bOrZs2cWCJw0aVI65ZRTsk+pQtlBBBe7du1altP6h/vss0+2+vGoo45KsdHH/vvv3+QmsUowHgOOXZIlAh1VwCPAHXVm9IsAAQIECBAgQIAAAQIECLSSwBprrJE9phur69Zaa60syBYBtG9+85vphz/8Ybr++uuz4F6lgNpVV12VPW676667plVXXTXFyrhY6dajR49s04t4ZPiJJ55IBx10UMXexiPIEYCM71itl6/+q1j5y8wDDzwwWwEYqwHXXnvtFKsEI8AY91tmmWXSj370o3Tuueem2Hyj8SPHzbX5dfIPP/zw7J2Ee+yxR+rXr1+KDU/mnnvutMIKK6T99tsvPffccylWTkoEOrJApy+frZ/ekTuob/Up8Oqrr6Z4F0WkWErdp0+f+hyoUREgQIAAgdYSGDO8tVqq/XYGHlL7YzACAjUsMH78+OzxxwgALb300jU8El0nUHsCs/Lnz9+/a2+e26LHVgC2hao2CRAgQIAAAQIECBAgQIAAAQIECHQQAQHADjIRukGAAAECBAgQIECAAAECBAgQIECgLQQEANtCVZsECBAgQIAAAQIECBAgQIAAAQIEOoiAAGAHmQjdIECAAAECBAgQIECAAAECBAgQINAWAgKAbaGqTQIECBAgQIAAAQIECBAgQIAAAQIdREAAsINMhG4QIECAAAECBAgQIECAAAECBAgQaAsBAcC2UNUmAQIECBAgQIAAAQIECBAgQIAAgQ4iIADYQSZCNwgQIECAAAECBAgQIECAAAECBAi0hYAAYFuoapMAAQIECBAgQIAAAQIECBAgQIBABxEQAOwgE6EbBAgQIECAAAECBAgQIECAAAECBNpCQACwLVS1SYAAAQIECBAgQIAAAQIECBAgQKCDCAgAdpCJ0A0CBAgQIECAAAECBAgQIECAAAECbSEgANgWqtokQIAAAQIECBAgQIBAnQrMMccc2cimTp2apk2bVqejNCwCHU/giy++KP2Zy/8cdrxe6lFHFRAA7Kgzo18ECBAgQIAAAQIECBDogAJzzTVXqVfvv/9+6dgBAQJtKzBp0qQ0ffr07Cbdu3dv25tpve4EBADrbkoNiAABAgQIECBAgAABAm0n0LNnz1Ljb731VorPlClTSoGJUqEDAgRaRSBW/n344YfpjTfeKLU3zzzzlI4dEKhGoHM1ldQhQIAAAQIECBAgQIAAAQIh0K1btzTffPOlDz74IAN59913U3w6deqUPJboN0Kg9QXiUft85V+0Hqv/5p577ta/kRbrWkAAsK6n1+AIECBAgAABAgQIECDQ+gK9e/dOXbp0SW+//Xap8QhQxHsBJQIE2k4ggn/f+ta3soB7291Fy/UoIABYxazGkvYHH3ww+zz00EMpPvEvXJF23XXXNGrUqOy4pf/Ekvibb7453XbbbVk748ePTx999FGKZbvLLrts2nTTTdPPfvazFP9HWk365JNP0llnnZWuvPLK9MILL6TPPvss9e3bN22xxRZpn332yf4HoZp2/vWvf6XTTz89jR49OsVx165dU//+/dP222+fhg4dmsrf71FNe+oQIECAAAECBAgQIFD/ArHab6GFFkrzzjtviveSffzxx9nfSeJRRYkAgdYViJW1EfiL+EGs/Is/fxKBmRXo9OW/0nz1BsmZvbJA9Vv6w1VNAPDJJ59M66+/fhbwa4kt/jCff/75WfCtpXoTJkzIAn3PPfdcxWqxHP/yyy9Pm2++ecXyPDOCfjvttFNp6X6en39HYPKGG25ISy21VJ7Vat+vvvpqFrCMBl955ZXUp0+fVmtbQwQIECBAoC4Fxgyvy2HN0qAGHjJLl7mIAAECBAgUUcDfv4s4603HbBOQpiYt5sQqu0022aTFOo0L42Wdsdov0nrrrZeGDx+ebr311vToo49mqwJj5V9E9KPOT37yk3TjjTc2bqJ0Hv+6NmjQoJQH/4YMGZJuv/32dN9996Xjjjsu9ejRIwvobbfddikCj82lJ554Igs0xns74pq4NtqItqLNSHGPWFEY95QIECBAgAABAgQIECBAgAABAgRqU8AjwFXM2xFHHJHWXHPN7LPIIoukl156KS255JJVXPlVlW984xtZsO3II49MK6ywQpPrIqD4/e9/P2277bYpXu659957p3hEuNLKwxNPPDE9++yzWRu/+93v0kEHHVRqb911100DBw5MG2ywQYpHhPfbb790xx13lMrLD6Is6nTu3DndcsstKa7N00YbbZSWXnrpNGzYsOxeJ598cgoDiQABAgQIECBAgAABAgQIECBAoPYErACsYs6OPvrobNVdBP9mJX3nO99Jf/rTnyoG//L2tt566/SDH/wgO41HfB9//PG8qPT9+eefp9NOOy07X3755dMBBxxQKssPIpC3xx57ZKdjxoxJjzzySF5U+o53GN55553ZedQtD/7llaLtuEekU089NcW9JQIECBAgQIAAAQIECBAgQIAAgdoTEADsQHMWq/fyFEHAximCdu+//36WHe8ejJWFldLgwYNL2VdffXXpOD+49tpr88O02267lY7LD6LtXXbZJct67733SgHD8jqOCRAgQIAAAQIECBAgQIAAAQIEOr5A5QhSx+93Xfbw008/LY2rUnDvnnvuKZUPGDCgdNz4YI011sh2Bor8sWPHNi5OeTuxe9Dqq6/epDzPKL9HpXbyer4JECBAgAABAgQIECBAgAABAgQ6roAAYAeam7vuuqvUm+WWW650nB+MGzcuP0yVyvPCeK9fv379stPya/LyPK9///7ZOwDz/Mbf5ffIr2lcxzkBAgQIECBAgAABAgQIECBAgEDHFrAJSAeZn9iVd/To0VlvVlxxxYrvC3zllVey8li517NnzxZ7HrsVxy7Ab7/9doqVhV27ds3qT5kyJb3zzjvZcZ8+fVpsY/75589WEn788ccpv3eLF5QVxjbjLaWJEye2VKyMAAECBAgQIECAAAECBAgQIECglQQEAFsJ8us0EwG6//3f/812AI52jj/++IrNffTRR1l+jx49KpaXZ0aQME+TJk0qBQDzNqKs2nYiABhtzEyKAKREgAABAgQIECBAgAABAgQIECAw+wU8Ajz75yD98pe/TA8//HDWk9jcY6uttqrYq1i9F6lLly4Vy8sz8xV/kTd58uRSUd5GZMxMO+VtlBpzQIAAAQIECBAgQIAAAQIECBAg0OEFrACczVM0fPjwdP7552e9iA05zjrrrGZ71K1bt6zss88+a7ZOXlC+oUj37t3z7JS3ERkz0055G6XGWjiY0SPD8QjwWmut1UILiggQIECAAAECBAgQIECAAAECBFpDQACwNRRnsY1zzz03HXroodnVyy67bLrxxhtLu/dWanKeeebJsqt5HDce281T+aO+eRtRNjPtlLeRt9vS94zeL9jStcoIECBAgAABAgQIECBAgAABAgRaT8AjwK1nOVMtXXHFFWno0KHZNYsvvni67bbbUq9evVpsIw+qRXDv/fffb7FuvgIv2ix/HDhWAC600ELZtTPaqOO9995LeSDRO/1a5FZIgAABAgQIECBAgAABAgQIEOiwAgKAs2Fq/va3v6VddtklffHFF6l3797p9ttvT3lwr6XurLDCCqXiZ599tnTc+GDq1KlpwoQJWfbyyy/fuDjleS+88EKKus2l8nvk1zRXVz4BAgQIECBAgAABAgQIECBAgEDHFBAAbOd5iWDf9ttvnwXeFlxwwXTrrbemfv36VdWL9ddfv1TvrrvuKh03PogNRfKVe+utt17j4pS3E3UeeeSRJuV5Rvk9KrWT1/NNgAABAgQIECBAgAABAgQIECDQcQUEANtxbu6777609dZbp9igY955500333xzWnHFFavuwYYbbpjmm2++rP5FF12Upk+fXvHaUaNGlfK33Xbb0nF+sM022+SH6cILLywdlx/E6sSLL744y+rZs2caOHBgebFjAgQIECBAgAABAgQIECBAgACBGhEQAGyniXr88cfTFltska3Mm3vuudMNN9yQYtffmUldunRJ++yzT3bJuHHj0oknntjk8vvvvz+NHDkyyx8wYEBac801m9SJ3Xe/+93vZvlRN65pnE466aQU94i07777pjnnnLNxFecECBAgQIAAAQIECBAgQIAAAQI1IGAX4ComaezYsSnel5end955Jz/M8stX3EXB4MGDS+VxEO/j23TTTUsbdxx77LHZSr6nn366Qb3yk4UXXjjFp3E66KCD0p/+9Kf0/PPPp2HDhmX332GHHVL37t3TmDFj0vHHH589Xhznp556auPLS+ennXZaisd6J0+enDbZZJNsN+JY5Rfnf/zjH9N5552X1V1mmWXSAQccULrOAQECBAgQIECAAAECBAgQIECAQG0JdPryMdLKz5HW1jjatLcR0ItHbqtNjUkjQLjbbrtVe3lW78gjj0xHHXVUxWsiGLn55pun8ePHVyyPx4svu+yyNGjQoIrleeZ1112XfvrTn6YPP/wwz2rwHcG/0aNHp/79+zfIb42T2IE431k4diyuZhOU1rivNggQIECAQM0KjBles11v9Y4PPKTVm9QgAQIECBCoVwF//67XmZ25cXkEeOa8OkTtCMg99thjacSIEWmNNdZI8Y6+ueaaKy277LJp//33T08++eQMg38xkC233DKrG9dEsC/aiLaizWg77tEWwb8OgagTBAgQIECAAAECBAgQIECAAIGCCFgBWJCJ7mjD9C8QHW1G9IcAAQIEOryAFYD/nSIrAP9r4YgAAQIECMxAwN+/ZwBUkGIrAAsy0YZJgAABAgQIECBAgAABAgQIECBQTAEBwGLOu1ETIECAAAECBAgQIECAAAECBAgUREAAsCATbZgECBAgQIAAAQIECBAgQIAAAQLFFBAALOa8GzUBAgQIECBAgAABAgQIECBAgEBBBAQACzLRhkmAAAECBAgQIECAAAECBAgQIFBMAQHAYs67URMgQIAAAQIECBAgQIAAAQIECBREQACwIBNtmAQIECBAgAABAgQIECBAgAABAsUUEAAs5rwbNQECBAgQIECAAAECBAgQIECAQEEEBAALMtGGSYAAAQIECBAgQIAAAQIECBAgUEwBAcBizrtREyBAgAABAgQIECBAgAABAgQIFERAALAgE22YBAgQIECAAAECBAgQIECAAAECxRQQACzmvBs1AQIECBAgQIAAAQIECBAgQIBAQQQEAAsy0YZJgAABAgQIECBAgAABAgQIECBQTAEBwGLOu1ETIECAAAECBAgQIECAAAECBAgUREAAsCATbZgECBAgQIAAAQIECBAgQIAAAQLFFBAALOa8GzUBAgQIECBAgAABAgQIECBAgEBBBAQACzLRhkmAAAECBAgQIECAAAECBAgQIFBMAQHAYs67URMgQIAAAQIECBAgQIAAAQIECBREQACwIBNtmAQIECBAgAABAgQIECBAgAABAsUUEAAs5rwbNQECBAgQIECAAAECBAgQIECAQEEEBAALMtGGSYAAAQIECBAgQIAAAQIECBAgUEwBAcBizrtREyBAgAABAgQIECBAgAABAgQIFERAALAgE22YBAgQIECAAAECBAgQIECAAAECxRQQACzmvBs1AQIECBAgQIAAAQIECBAgQIBAQQQEAAsy0YZJgAABAgQIECBAgAABAgQIECBQTAEBwGLOu1ETIECAAAECBAgQIECAAAECBAgUREAAsCATbZgECBAgQIAAAQIECBAgQIAAAQLFFBAALOa8GzUBAgQIECBAgAABAgQIECBAgEBBBAQACzLRhkmAAAECBAgQIECAAAECBAgQIFBMAQHAYs67URMgQIAAAQIECBAgQIAAAQIECBREoHNBxmmYBAgQIECAAIH2ERgzvH3u4y4ECBAgQIAAAQIEqhSwArBKKNUIECBAgAABAgQIECBAgAABAgQI1KKAAGAtzpo+EyBAgAABAgQIECBAgAABAgQIEKhSQACwSijVCBAgQIAAAQIECBAgQIAAAQIECNSigABgLc6aPhMgQIAAAQIECBAgQIAAAQIECBCoUkAAsEoo1QgQIECAAAECBAgQIECAAAECBAjUooAAYC3Omj4TIECAAAECBAgQIECAAAECBAgQqFJAALBKKNUIECBAgAABAgQIECBAgAABAgQI1KKAAGAtzpo+EyBAgAABAgQIECBAgAABAgQIEKhSQACwSijVCBAgQIAAAQIECBAgQIAAAQIECNSigABgLc6aPhMgQIAAAQIECBAgQIAAAQIECBCoUkAAsEoo1QgQIECAAAECBAgQIECAAAECBAjUooAAYC3Omj4TIECAAAECBAgQIECAAAECBAgQqFJAALBKKNUIECBAgAABAgQIECBAgAABAgQI1KKAAGAtzpo+EyBAgAABAgQIECBAgAABAgQIEKhSQACwSijVCBAgQIAAAQIECBAgQIAAAQIECNSigABgLc6aPhMgQIAAAQIECBAgQIAAAQIECBCoUkAAsEoo1QgQIECAAAECBAgQIECAAAECBAjUooAAYC3Omj4TIECAAAECBAgQIECAAAECBAgQqFJAALBKKNUIECBAgAABAgQIECBAgAABAgQI1KKAAGAtzpo+EyBAgAABAgQIECBAgAABAgQIEKhSQACwSijVCBAgQIAAAQIECBAgQIAAAQIECNSigABgLc6aPhMgQIAAAQIECBAgQIAAAQIECBCoUkAAsEoo1QgQIECAAAECBAgQIECAAAECBAjUooAAYC3OmiBqJsIAAEAASURBVD4TIECAAAECBAgQIECAAAECBAgQqFJAALBKKNUIECBAgAABAgQIECBAgAABAgQI1KKAAGAtzpo+EyBAgAABAgQIECBAgAABAgQIEKhSQACwSijVCBAgQIAAAQIECBAgQIAAAQIECNSigABgLc6aPhMgQIAAAQIECBAgQIAAAQIECBCoUkAAsEoo1QgQIECAAAECBAgQIECAAAECBAjUooAAYC3Omj4TIECAAAECBAgQIECAAAECBAgQqFJAALBKKNUIECBAgAABAgQIECBAgAABAgQI1KKAAGAtzpo+EyBAgAABAgQIECBAgAABAgQIEKhSQACwSijVCBAgQIAAAQIECBAgQIAAAQIECNSigABgLc6aPhMgQIAAAQIECBAgQIAAAQIECBCoUkAAsEoo1QgQIECAAAECBAgQIECAAAECBAjUooAAYC3Omj4TIECAAAECBAgQIECAAAECBAgQqFJAALBKKNUIECBAgAABAgQIECBAgAABAgQI1KKAAGAtzpo+EyBAgAABAgQIECBAgAABAgQIEKhSQACwSijVCBAgQIAAAQIECBAgQIAAAQIECNSigABgLc6aPhMgQIAAAQIECBAgQIAAAQIECBCoUkAAsEoo1QgQIECAAAECBAgQIECAAAECBAjUooAAYC3Omj4TIECAAAECBAgQIECAAAECBAgQqFJAALBKKNUIECBAgAABAgQIECBAgAABAgQI1KKAAGAtzpo+EyBAgAABAgQIECBAgAABAgQIEKhSQACwSijVCBAgQIAAAQIECBAgQIAAAQIECNSiQOda7LQ+EyBAgAABAgQIFFhgzPC2GfzAQ9qmXa0SIECAAAECBGazgBWAs3kC3J4AAQIECBAgQIAAAQIECBAgQIBAWwoIALalrrYJECBAgAABAgQIECBAgAABAgQIzGYBAcDZPAFuT4AAAQIECBAgQIAAAQIECBAgQKAtBQQA21JX2wQIECBAgAABAgQIECBAgAABAgRms4AA4GyeALcnQIAAAQIECBAgQIAAAQIECBAg0JYCAoBV6L711lvp+uuvT0cccUT6/ve/nxZaaKHUqVOn7DN48OAqWmhY5aabbko/+MEPUp8+fVLXrl2z7ziP/GrT1KlT07nnnps22GCD1KtXr9S9e/fUv3//tNdee6Vnnnmm2mbSu+++m4488si0yiqrpPnmmy/NO++82XHkRZlEgAABAgQIECBAgAABAgQIECBQ2wKda7v77dP7RRZZpFVuNH369CxAd9555zVo77XXXkvXXHNN9tlzzz3TOeeckwUXG1QqO4nA3BZbbJEeeOCBstyUJkyYkH1GjRqVzj777LT77rs3KG988tBDD6Wtt946TZw4sUHRk08+meJz/vnnp7/+9a9pjTXWaFDuhAABAgQIECBAgAABAgQIECBAoHYErACcybnq27dv2mSTTWbyqq+qH3bYYSkP/q222mrpiiuuSA8++GD2HeeRovzwww//6oIK/502bVq2ejAP/sXKwRtvvDELBp5++ulp4YUXTp9++mmKQOLNN99coYWvsiLouOWWW2bBv86dO6dhw4alu+++O/vEceS9/vrradCgQSnqSgQIECBAgAABAgQIECBAgAABArUpYAVgFfMWj/6uueaa2SdWA7700ktpySWXrOLK/1Z54YUX0u9+97ssI1bURbAtHtuNFG1vtdVWacCAAenhhx9OI0aMSLvttlvq169fVl7+n0suuSS7NvKGDh2azjrrrFLxWmutlT2ivPrqq6cPP/ww7b333tnjwBHMa5x+85vfpDfffDPLvvzyy9N2221XqvLd7343W/W3/fbbZ3UiIHnBBReUyh0QIECAAAECBAgQIECAAAECBAjUjoAVgFXM1dFHH52thPs6jwKfcsopKd7bF+mMM84oBf/y288111xZfpxHvVNPPTUvavB9wgknZOfzzz9/yo/LK8R7AA855JAsa/z48dkjvOXlcRyBv0svvTTL3nTTTRsE//K6ERCMskgXX3xxKViYl/smQIAAAQIECBAgQIAAAQIECBCoDQEBwHaYp3j3X7xLL9Jyyy2X1llnnYp3jfxll102K7v22mtTXFeeIqCXb/Dx4x//OEXQsFIq35jk6quvblLlb3/7W4pHiSPFSsPmUt5O1I1rJAIECBAgQIAAAQIECBAgQIAAgdoTEABshzl78cUXS+/Ri8d8W0p5+auvvpo9alxe95577imd5vVKGWUHiy66aFpmmWWynLFjx5aVfHVYbTvl96jUTpOGZRAgQIAAAQIECBAgQIAAAQIECHQ4AQHAdpiScePGle4SKwBbSuXl5dfFNeXn5fUqtZeXv/LKK+njjz9uUCVvZ7755ksRLGwu9e7dO80777xZcX5Nc3XlEyBAgAABAgQIECBAgAABAgQIdEyBprtDdMx+1nSvIgiXpz59+uSHFb9jl+E8lV8XeeXn1bYTjxHHasL80eLydmbURtSN/vzjH/9ocO/In1GKe7aUJk6c2FKxMgIECBAgQIAAAQIECBAgQIAAgVYSEABsJciWmvnoo49KxT169CgdVzqYe+65S9mTJk0qHcdBa7czo77EPfP+NO5LlLWUygOZLdVTRoAAAQIECBAgQIAAAQIECBAg0LYCHgFuW9+s9SlTppTu0qVLl9JxpYOuXbuWsidPnlw6joPWbmdGfYl75v1p3JcokwgQIECAAAECBAgQIECAAAECBDq+gBWA7TBH3bp1K93ls88+Kx1XOvj0009L2d27dy8dx0HjdsrPG1T88mRG7XzyySdpRn2JNvN2Gvel8f0an5c/rty4LM7jEeC11lqrUpE8AgQIECBAgAABAgQIECBAgACBVhQQAGxFzOaammeeeUpFM3qUtnzDjsaP6DZup6UA4IzaiQDgjPoSnc7badyX0oCaOajm/YLNXCqbAAECBAgQIECAAAECBAgQIECgFQU8AtyKmM01VR4Mm9HmGOUr5xq/R29W2unUqVMqvy76mJ/PqC9RN+9P475EmUSAAAECBAgQIECAAAECBAgQINDxBQQA22GOVlhhhdJdnn322dJxpYPy8uWXX75BlVlpJwJ3+UYeeWN5Ox988EF644038uwm3/GY7ocffpjlN+5Lk8oyCBAgQIAAAQIECBAgQIAAAQIEOqSAAGA7TMuSSy6ZFltssexOd911V4t3vPvuu7Pyb37zm2mJJZZoUHf99dcvnbfUTgT1nn/++azueuutV7omP6i2nfJ7VGonb883AQIECBAgQIAAAQIECBAgQIBAxxUQAGyHuYnHcLfeeuvsTrHC7+9//3vFu0Z+vgIw6sd15WmZZZZJ+Uq8P//5zyne41cpjRo1qpS97bbblo7zg6222ip94xtfTf2FF16YZzf5ztuJunGNRIAAAQIECBAgQIAAAQIECBAgUHsCAoDtNGf77bdf6tz5qz1X9t577zR58uQGd47zyI8U9aJ+pXTggQdm2f/+97/TsGHDmlSZMGFCGj58eJbfr1+/VCkAuOiii6addtopq3PzzTenv/zlL03aufLKK1OURdp5551TXCMRIECAAAECBAgQIECAAAECBAjUnoBdgKuYs7Fjx6YXXnihVPOdd94pHUd+vlIuzxw8eHB+WPqO1XsRvPvtb3+bHn744RSP1B588MEpgnQRtBsxYkR67LHHsvoHHXRQWnrppUvXlh/suuuu6YILLkj33ntvOuuss7J3+A0ZMiTNP//86cEHH0zHHHNM9t6+WLV3xhlnlIKO5W3E8XHHHZduuumm9Pbbb6cdd9wx69OgQYOyatdff3066aSTsuNevXqlY489Njv2HwIECBAgQIAAAQIECBAgQIAAgdoT6DT9y1R73W7fHkdA76KLLqr6ps2RfvHFFymCdRHAay7tscce6bzzzis9olupXgQgN9988/TQQw9VKk5dunRJZ555ZnavihX+k/nAAw+kbbbZptmNQGLV37XXXpvWXnvtlpqZpbLYgTjfWTh2Gs53Jp6lxlxEgAABAgQ6ksCYr1bid6Qu6UuVAgMPqbKiagQIECBAoHYE/P27duaqLXvqEeC21G3UdqzKGzlyZBo9enT2TsDYGCSCdfEd7/y74YYb0vnnn99i8C+aXGihhdJ9992Xzj777BQbeiy44IKpW7duaamllsqCfo8++ugMg3/RTgT2nnrqqXTYYYellVZaKfXo0SP7fPvb387ynn766TYJ/sW9JQIECBAgQIAAAQIECBAgQIAAgfYRsAKwfZzdpZGAf4FoBOKUAAECBOpHwArA2p1LKwBrd+70nAABAgSaFfD372ZpClVgBWChpttgCRAgQIAAAQIECBAgQIAAAQIEiiYgAFi0GTdeAgQIECBAgAABAgQIECBAgACBQgkIABZqug2WAAECBAgQIECAAAECBAgQIECgaAICgEWbceMlQIAAAQIECBAgQIAAAQIECBAolIAAYKGm22AJECBAgAABAgQIECBAgAABAgSKJiAAWLQZN14CBAgQIECAAAECBAgQIECAAIFCCQgAFmq6DZYAAQIECBAgQIAAAQIECBAgQKBoAgKARZtx4yVAgAABAgQIECBAgAABAgQIECiUgABgoabbYAkQIECAAAECBAgQIECAAAECBIomIABYtBk3XgIECBAgQIAAAQIECBAgQIAAgUIJCAAWaroNlgABAgQIECBAgAABAgQIECBAoGgCAoBFm3HjJUCAAAECBAgQIECAAAECBAgQKJSAAGChpttgCRAgQIAAAQIECBAgQIAAAQIEiiYgAFi0GTdeAgQIECBAgAABAgQIECBAgACBQgkIABZqug2WAAECBAgQIECAAAECBAgQIECgaAICgEWbceMlQIAAAQIECBAgQIAAAQIECBAolIAAYKGm22AJECBAgAABAgQIECBAgAABAgSKJiAAWLQZN14CBAgQIECAAAECBAgQIECAAIFCCQgAFmq6DZYAAQIECBAgQIAAAQIECBAgQKBoAgKARZtx4yVAgAABAgQIECBAgAABAgQIECiUgABgoabbYAkQIECAAAECBAgQIECAAAECBIomIABYtBk3XgIECBAgQIAAAQIECBAgQIAAgUIJCAAWaroNlgABAgQIECBAgAABAgQIECBAoGgCAoBFm3HjJUCAAAECBAgQIECAAAECBAgQKJSAAGChpttgCRAgQIAAAQIECBAgQIAAAQIEiiYgAFi0GTdeAgQIECBAgAABAgQIECBAgACBQgkIABZqug2WAAECBAgQIECAAAECBAgQIECgaAICgEWbceMlQIAAAQIECBAgQIAAAQIECBAolIAAYKGm22AJECBAgAABAgQIECBAgAABAgSKJiAAWLQZN14CBAgQIECAAAECBAgQIECAAIFCCQgAFmq6DZYAAQIECBAgQIAAAQIECBAgQKBoAgKARZtx4yVAgAABAgQIECBAgAABAgQIECiUgABgoabbYAkQIECAAAECBAgQIECAAAECBIomIABYtBk3XgIECBAgQIAAAQIECBAgQIAAgUIJCAAWaroNlgABAgQIECBAgAABAgQIECBAoGgCAoBFm3HjJUCAAAECBAgQIECAAAECBAgQKJSAAGChpttgCRAgQIAAAQIECBAgQIAAAQIEiiYgAFi0GTdeAgQIECBAgAABAgQIECBAgACBQgkIABZqug2WAAECBAgQIECAAAECBAgQIECgaAICgEWbceMlQIAAAQIECBAgQIAAAQIECBAolIAAYKGm22AJECBAgAABAgQIECBAgAABAgSKJiAAWLQZN14CBAgQIECAAAECBAgQIECAAIFCCQgAFmq6DZYAAQIECBAgQIAAAQIECBAgQKBoAgKARZtx4yVAgAABAgQIECBAgAABAgQIECiUgABgoabbYAkQIECAAAECBAgQIECAAAECBIomIABYtBk3XgIECBAgQIAAAQIECBAgQIAAgUIJCAAWaroNlgABAgQIECBAgAABAgQIECBAoGgCAoBFm3HjJUCAAAECBAgQIECAAAECBAgQKJSAAGChpttgCRAgQIAAAQIECBAgQIAAAQIEiiYgAFi0GTdeAgQIECBAgAABAgQIECBAgACBQgkIABZqug2WAAECBAgQIECAAAECBAgQIECgaAICgEWbceMlQIAAAQIECBAgQIAAAQIECBAolIAAYKGm22AJECBAgAABAgQIECBAgAABAgSKJiAAWLQZN14CBAgQIECAAAECBAgQIECAAIFCCQgAFmq6DZYAAQIECBAgQIAAAQIECBAgQKBoAgKARZtx4yVAgAABAgQIECBAgAABAgQIECiUgABgoabbYAkQIECAAAECBAgQIECAAAECBIomIABYtBk3XgIECBAgQIAAAQIECBAgQIAAgUIJCAAWaroNlgABAgQIECBAgAABAgQIECBAoGgCAoBFm3HjJUCAAAECBAgQIECAAAECBAgQKJSAAGChpttgCRAgQIAAAQIECBAgQIAAAQIEiiYgAFi0GTdeAgQIECBAgAABAgQIECBAgACBQgkIABZqug2WAAECBAgQIECAAAECBAgQIECgaAICgEWbceMlQIAAAQIECBAgQIAAAQIECBAolIAAYKGm22AJECBAgAABAgQIECBAgAABAgSKJiAAWLQZN14CBAgQIECAAAECBAgQIECAAIFCCQgAFmq6DZYAAQIECBAgQIAAAQIECBAgQKBoAgKARZtx4yVAgAABAgQIECBAgAABAgQIECiUgABgoabbYAkQIECAAAECBAgQIECAAAECBIomIABYtBk3XgIECBAgQIAAAQIECBAgQIAAgUIJCAAWaroNlgABAgQIECBAgAABAgQIECBAoGgCAoBFm3HjJUCAAAECBAgQIECAAAECBAgQKJSAAGChpttgCRAgQIAAAQIECBAgQIAAAQIEiiYgAFi0GTdeAgQIECBAgAABAgQIECBAgACBQgkIABZqug2WAAECBAgQIECAAAECBAgQIECgaAICgEWbceMlQIAAAQIECBAgQIAAAQIECBAolIAAYKGm22AJECBAgAABAgQIECBAgAABAgSKJiAAWLQZN14CBAgQIECAAAECBAgQIECAAIFCCQgAFmq6DZYAAQIECBAgQIAAAQIECBAgQKBoAgKARZtx4yVAgAABAgQIECBAgAABAgQIECiUgABgoabbYAkQIECAAAECBAgQIECAAAECBIomIADYzjP+2WefpZEjR6bNNtss9e7dO3Xt2jX16NEjLbvssmn33XdPf//736vq0U033ZR+8IMfpD59+mRtxHecR361aerUqencc89NG2ywQerVq1fq3r176t+/f9prr73SM888U20z6hEgQIAAAQIECBAgQIAAAQIECHRggU7Tv0wduH911bVXXnklbbHFFumpp55qcVz7779/Oumkk1KnTp2a1IvpigDdeeed16Qsz9hzzz3TOeecU/H6vM67776b9eWBBx7Isxp8R2Dy7LPPzoKSDQpa6eTVV19Nffv2zVoLlwhgSgQIECBAoC4Exgyvi2EUchADDynksA2aAAECBOpbwN+/63t+qx2dFYDVSn3NerHarjz4t/LKK6dRo0al+++/P91yyy3piCOOSHPPPXd2l1NOOSWdeOKJFe942GGHlYJ/q622WrriiivSgw8+mH3HeaQIDh5++OEVr4/MadOmZasF8+BfrBy88cYbU5yffvrpaeGFF06ffvppikDizTff3Gw7CggQIECAAAECBAgQIECAAAECBDq+gBWA7TRHV111VfrRj36U3W3ddddN99xzT5pjjjka3P2RRx5JUfb555+n+eefP7311lupc+fOpTovvPBCWn755VMEE9dYY4109913Z4/t5hU++eSTNGDAgPTwww9n1z377LOpX79+eXHpOwKPu+22W3Y+dOjQdNZZZ5XK4iDus/rqq6cPP/wwLb300tnjwOX9aFB5Fk/8C8QswrmMAAECBDq+gBWAHX+OmuuhFYDNycgnQIAAgRoW8PfvGp68Vuz6f6NLrdioppoK3HvvvaXMQw45pEnwLwoj6DZo0KB0zTXXpPfeey9FAG+llVYqXRcrAyP4F+mMM85oEPyLvLnmmivLjyBi1Dv11FOz8ygrTyeccEJ2GkHG/Li8PN4DGH2Mz/jx49Nf//rX9MMf/rC8imMCBAgQIECAQP0JtGXwVnCx/n4vRkSAAAECBGpIwCPA7TRZsflHnpZaaqn8sMl3+Yq9eAw3T/HuvwjERVpuueXSOuuskxc1+I782FAk0rXXXpsav+IxAnr5Bh8//vGPs6Bhgwb+czJ48OBS9tVXX106dkCAAAECBAgQIECAAAECBAgQIFBbAgKA7TRfyyyzTOlO//znP0vHjQ8mTJiQZcUGIPH4bZ5efPHF9Nprr2Wn8ZhvSykvj2W+L730UoOq8ehxnvJ6+Xn596KLLpryPo8dO7a8yDEBAgQIECBAgAABAgQIECBAgEANCQgAttNk7bjjjmneeefN7jZixIhsI47Gt37sscfS6NGjs+wddtihVD8yxo0bV6oeKwBbSuXl5dfFNeXn5fUqtZeXxy69H3/8caUq8ggQIECAAAECBAgQIECAAAECBDq4gHcAttME9erVK9v1d6eddkrxPsA111wz7bffftkqu0mTJmV5J510UopHhVddddV08sknN+hZBOHy1KdPn/yw4nffvn1L+eXXRWb5ebXtxGPEsZowf7S41HgLB1G/pTRx4sSWipURIECAAAECBAgQIECAAAECBAi0koAAYCtBVtPMtttum+3QG8G9Cy64IO26664NLltkkUXS0Ucfnfbcc88099xzNyj76KOPSuc9evQoHVc6KL82govlqbXaKW+z0nF5ELJSuTwCBAgQIECAAAECBAgQIECAAIH2EfAIcPs4Z3f5/PPP0+WXX56uu+66JptzRIU333wzXXHFFenOO+/M6pf/Z8qUKaXTLl26lI4rHXTt2rWUPXny5NJxHLRWOw0adUKAAAECBAgQIECAAAECBAgQINBhBQQA22lq4h16G2+8cTruuOPSu+++m4YNG5a9jy92+v3ggw/SLbfcktZff/300EMPpS233DKddtppDXrWrVu30nn5jsKlzLKD8t2Du3fvXlaSUmu106DRCifxqHFLnwcffLDCVbIIECBAgAABAgQIECBAgAABAgRaW8AjwK0t2kx7Rx55ZLr77ruz0pEjRzZ4/DdW9H3ve99LAwcOTJtsskkaM2ZM+tWvfpWdr7zyytk188wzT6nlxo/1lgr+c1C+YUfjx4Ubt1MeEJyZdhrXbXw+o/cLNq7vnACB/8/enYBbVdWNA14gMokpiBOC4YSi1aePSijOSqZohrOWU6SmadhfnCpnc8gM0xxCUMovp9T0SzSHMoeEADW/TEhFFFHMQBQRxBD/rt13Tvvec+69DOeec/a+734eO2uvvfYa3nUC7u+uvRcBAgQIECBAgAABAgQIECDQOgJWALaOa4Na4yYaN910U5LXr1+/BsG/dMEOHTqECy+8MMlasmRJ8Z6YkQ6otbTBRnqjj8bv4lueetq1a9eg/XSfpQkQIECAAAECBAgQIECAAAECBOpbQACwCvMT3+33zjvvJC1ttdVWzba49dZbF69PnTq1mN58882L6XR+MTOVSF/v379/6koIy1NPDCKmNxZpUKETAgQIECBAgAABAgQIECBAgACBuhYQAKzC9MSVfYVj8eLFhWTZz7hRSOFI37fBBhuEXr16JZcee+yxQpGyn4VHjddbb73Qt2/fBmXiewYLR3P1vPXWW+HFF19Mig4aNKhwi08CBAgQIECAAAECBAgQIECAAIGMCQgAVmHCevToET7zmc8kLY0fPz40FwRMB+Vi0K9wxMdw99tvv+Q0rvCbMGFC4VKDz5hfWAEYy8f70kd8BLmwKvCOO+4ICxYsSF8upseOHVtMDx06tJiWIECAAAECBAgQIECAAAECBAgQyJaAAGAV5qt9+/ZhyJAhSUtvvvlmshNwuWbnzp0bzjjjjOKlffbZp5iOiVNOOSUUVgWefPLJYeHChQ2ux/OYH49YLpYvd4wYMSLJjo8lx92IGx/Tpk0Ll1xySZK90UYbBQHAxkLOCRAgQIAAAQIECBAgQIAAAQLZERAArNJcnXPOOaFr165Ja+edd174yle+Eu66667w7LPPhrgqcOTIkWHLLbcML7zwQlJm9913T3YETncvrt4rBO8mT54c4qO5t99+e4jp+BnPYzoep512Wthkk03StxfTRx11VFI2ZlxzzTXhwAMPDA8++GCYOHFi+NnPfha23377MG/evBADl1dffXUx6FisQIIAAQIECBAgQIAAAQIECBAgQCAzAu0+3aH2k8z0NuMdfeSRR8Jhhx0WZs+e3exIdtttt3DnnXeG7t27l5SLuwMfe+yx4cYbbyy5VsgYNmxYGDVqVBLAK+Q1/ox92HvvvcOkSZMaX0rOO3bsmAQDY1utccSdjAs7FMddi9O7E7dGe+okQIAAAQJVE3j036voq9aehrIhsOtZ2einXhIgQIBA7gT8/J27KV2uAf1nd4rlut1NyyKwxx57JO/nGzNmTHjggQfC3/72t/Duu+8mK+zWWWedsO2224bDDz88WR3Y+N19hXbiqrx4/wEHHJAE+WIALwbzevbsmdx//PHHh7322qtQvMnPWP6pp54KN9xwQ7jlllvClClTwgcffJBsNBJXHw4fPjxsscUWTd7vAgECBAgQyLSAIF2mp0/nCRAgQIAAAQIElk3ACsBl81K6QgJ+A1EhSNUQIECAwPIJCAAun5u7ll/ACsDlt3MnAQIECKyQgJ+/V4gvNzd7B2BuptJACBAgQIAAAQIECBAgQIAAAQIECJQKCACWmsghQIAAAQIECBAgQIAAAQIECBAgkBsBAcDcTKWBECBAgAABAgQIECBAgAABAgQIECgVEAAsNZFDgAABAgQIECBAgAABAgQIECBAIDcCAoC5mUoDIUCAAAECBAgQIECAAAECBAgQIFAqIABYaiKHAAECBAgQIECAAAECBAgQIECAQG4EBABzM5UGQoAAAQIECBAgQIAAAQIECBAgQKBUQACw1EQOAQIECBAgQIAAAQIECBAgQIAAgdwICADmZioNhAABAgQIECBAgAABAgQIECBAgECpgABgqYkcAgQIECBAgAABAgQIECBAgAABArkREADMzVQaCAECBAgQIECAAAECBAgQIECAAIFSAQHAUhM5BAgQIECAAAECBAgQIECAAAECBHIjIACYm6k0EAIECBAgQIAAAQIECBAgQIAAAQKlAgKApSZyCBAgQIAAAQIECBAgQIAAAQIECORGQAAwN1NpIAQIECBAgAABAgQIECBAgAABAgRKBQQAS03kECBAgAABAgQIECBAgAABAgQIEMiNgABgbqbSQAgQIECAAAECBAgQIECAAAECBAiUCggAlprIIUCAAAECBAgQIECAAAECBAgQIJAbAQHA3EylgRAgQIAAAQIECBAgQIAAAQIECBAoFRAALDWRQ4AAAQIECBAgQIAAAQIECBAgQCA3AgKAuZlKAyFAgAABAgQIECBAgAABAgQIECBQKiAAWGoihwABAgQIECBAgAABAgQIECBAgEBuBAQAczOVBkKAAAECBAgQIECAAAECBAgQIECgVEAAsNREDgECBAgQIECAAAECBAgQIECAAIHcCAgA5mYqDYQAAQIECBAgQIAAAQIECBAgQIBAqYAAYKmJHAIECBAgQIAAAQIECBAgQIAAAQK5ERAAzM1UGggBAgQIECBAgAABAgQIECBAgACBUgEBwFITOQQIECBAgAABAgQIECBAgAABAgRyIyAAmJupNBACBAgQIECAAAECBAgQIECAAAECpQICgKUmcggQIECAAAECBAgQIECAAAECBAjkRkAAMDdTaSAECBAgQIAAAQIECBAgQIAAAQIESgUEAEtN5BAgQIAAAQIECBAgQIAAAQIECBDIjYAAYG6m0kAIECBAgAABAgQIECBAgAABAgQIlAoIAJaayCFAgAABAgQIECBAgAABAgQIECCQGwEBwNxMpYEQIECAAAECBAgQIECAAAECBAgQKBUQACw1kUOAAAECBAgQIECAAAECBAgQIEAgNwICgLmZSgMhQIAAAQIECBAgQIAAAQIECBAgUCogAFhqIocAAQIECBAgQIAAAQIECBAgQIBAbgQEAHMzlQZCgAABAgQIECBAgAABAgQIECBAoFRAALDURA4BAgQIECBAgAABAgQIECBAgACB3AgIAOZmKg2EAAECBAgQIECAAAECBAgQIECAQKmAAGCpiRwCBAgQIECAAAECBAgQIECAAAECuREQAMzNVBoIAQIECBAgQIAAAQIECBAgQIAAgVIBAcBSEzkECBAgQIAAAQIECBAgQIAAAQIEciMgAJibqTQQAgQIECBAgAABAgQIECBAgAABAqUCAoClJnIIECBAgAABAgQIECBAgAABAgQI5EZAADA3U2kgBAgQIECAAAECBAgQIECAAAECBEoFBABLTeQQIECAAAECBAgQIECAAAECBAgQyI2AAGBuptJACBAgQIAAAQIECBAgQIAAAQIECJQKCACWmsghQIAAAQIECBAgQIAAAQIECBAgkBsBAcDcTKWBECBAgAABAgQIECBAgAABAgQIECgVEAAsNZFDgAABAgQIECBAgAABAgQIECBAIDcCAoC5mUoDIUCAAAECBAgQIECAAAECBAgQIFAqIABYaiKHAAECBAgQIECAAAECBAgQIECAQG4EBABzM5UGQoAAAQIECBAgQIAAAQIECBAgQKBUQACw1EQOAQIECBAgQIAAAQIECBAgQIAAgdwICADmZioNhAABAgQIECBAgAABAgQIECBAgECpgABgqYkcAgQIECBAgAABAgQIECBAgAABArkREADMzVQaCAECBAgQIECAAAECBAgQIECAAIFSAQHAUhM5BAgQIECAAAECBAgQIECAAAECBHIjIACYm6k0EAIECBAgQIAAAQIECBAgQIAAAQKlAgKApSZyCBAgQIAAAQIECBAgQIAAAQIECORGQAAwN1NpIAQIECBAgAABAgQIECBAgAABAgRKBQQAS03kECBAgAABAgQIECBAgAABAgQIEMiNgABgbqbSQAgQIECAAAECBAgQIECAAAECBAiUCggAlprIIUCAAAECBAgQIECAAAECBAgQIJAbAQHA3EylgRAgQIAAAQIECBAgQIAAAQIECBAoFRAALDWRQ4AAAQIECBAgQIAAAQIECBAgQCA3AgKAuZlKAyFAgAABAgQIECBAgAABAgQIECBQKiAAWGoihwABAgQIECBAgAABAgQIECBAgEBuBAQAczOVBkKAAAECBAgQIECAAAECBAgQIECgVEAAsNREDgECBAgQIECAAAECBAgQIECAAIHcCAgA5mYqDYQAAQIECBAgQIAAAQIECBAgQIBAqYAAYKmJHAIECBAgQIAAAQIECBAgQIAAAQK5ERAAzM1UGggBAgQIECBAgAABAgQIECBAgACBUgEBwFITOQQIECBAgAABAgQIECBAgAABAgRyIyAAmJupNBACBAgQIECAAAECBAgQIECAAAECpQICgKUmcggQIECAAAECBAgQIECAAAECBAjkRkAAMDdTaSAECBAgQIAAAQIECBAgQIAAAQIESgUEAEtN5BAgQIAAAQIECBAgQIAAAQIECBDIjYAAYG6m0kAIECBAgAABAgQIECBAgAABAgQIlAoIAJaayCFAgAABAgQIECBAgAABAgQIECCQGwEBwBpM5ezZs8OPfvSjMGjQoLDOOuuETp06hV69eoUvfvGL4bTTTgvjx49vsVexzBFHHBH69u0bOnfuHNZdd93w5S9/Odx2220t3psuEMvvueeeyf2xnlhfrHfChAnpYtIECBAgQIAAAQIECBAgQIAAAQIZFeiQ0X5nttu//vWvwwknnBDmzJnTYAyzZs0K8b+JEyeGl156Kdxzzz0NrqdPLrjggnD++eeHJUuWFLPfeuutEP978MEHwy233BLuuOOOJDBYLNAo8eGHH4aDDjoo3HfffQ2uvPbaayH+F+s477zzwtlnn93guhMCBAgQIECAAAECBAgQIECAAIFsCVgBWMX5+uUvfxkOPfTQJPi31lprhXPPPTc8/PDD4emnnw7jxo0LV111VRg8eHBYeeWVm+zV6NGjk/ti8G+jjTYKY8aMSYKGMWC46667Jvf99re/Dd/85jebrCNeGDZsWDH4F++L98fgY6wv1hvrP+ecc0Jsz0GAAAECBAgQIECAAAECBAgQIJBdgXaffHpkt/vZ6fmUKVPCVlttFRYtWhR23HHHEIN0q622WtkBfPTRR6Fjx44l1959992wwQYbhPi5/vrrJ4HDnj17Fst9/PHHYejQoUndMfOxxx4LO+20U/F6IRHzd9lll+R03333Db/5zW/CSiutVLgc4iPKW2+9dZgxY0bo3r17eOWVV8Lqq69evF6JxMyZM0OfPn2Sql5//fXQu3fvSlSrDgIECBAgsHQCj16ydOWUIlApgV3PqlRN6iFAgAABAssk4OfvZeLKbWErAKs0tSeffHIS/IsBu7vvvrvJ4F/sTrngX8y/4YYbkuBfTF922WUhHfyLeTGId+211xaDeZdffnnMLjni+wfj0bh8oWCsN9Yfj7lz5yarAgvXfBIgQIAAAQIECBAgQIAAAQIECGRLQACwCvM1derU8Pvf/z5p6aSTTioJ3C1tFwrvBfzMZz4T9t9//7K3xZV0e+yxR3ItPl48f/78BuXieaEv8XHjplbexfpjO/GIAUsHAQIECBAgQIAAAQIECBAgQIBANgUEAKswb3Hjj8IRN94oHHF1Xdzwo/GGIIXr6c/4WHB8R188tttuuyZXCcbrO++8c/xIVhxOmjQpSRf+J9YRH0OOR6Fc4Vr6M65CHDhwYJIV7/nXv/6VvixNgAABAgQIECBAgAABAgQIECCQEQEBwCpM1IQJE5JW4jv/+vfvH371q1+F//qv/wo9evQI/fr1S1YEbrjhhsnOvo1X7BW6FwOFixcvTk4322yzQnbZz/T1+O7B9JE+T5dLlymkC9dju7F9BwECBAgQIECAAAECBAgQIECAQPYEOmSvy9nr8QsvvJB0um/fviG+C/Caa64pGcT06dPDeeedF+68887w4IMPhl69ejUoEzfKKBxNPbZbuF7YXCOep+9rfL6s9Wy++eaFJlr8jC8Zbe6YNWtWc5ddI0CAAAECBAgQIECAAAECBAgQqJCAAGCFIJur5p133kkux3cBPvfcc8mOupdeemnyHr/4nr2//vWv4ZxzzgkPPPBAeP7550N8TPiJJ54I7dv/Z4Hm+++/X2yiW7duxXS5xCqrrFLMbryisFL1FBtoIpEOQjZRRDYBAgQIECBAgAABAgQIECBAgEAVBP4TYapCY221iQ8++CAZenz3Xtx5Nwb6jj/++LDmmmuGTp06hW222Sbcd999Ya+99krKPfXUUyUbb3z44YdFvqZ2CS4UiHUWjoULFxaSyWel6mlQqRMCBAgQIECAAAECBAgQIECAAIG6FbACsApT07lz51AIAsbVfYXNNdJNx9V+l19+eRIcjPm33nprOPDAA4tFYh2FI24I0txR2OQjlunSpUuDopWqp0GlZU4aP3rcuEh8BHjAgAGNs50TIECAAAECBAgQIECAAAECBAhUWEAAsMKg5apbddVViwHAwiq/cuW22GKLsN5664U33ngjNN69N9ZROBo/1lvIL3wWgo3xvPHjwpWqp9BWU58tvV+wqfvkEyBAgAABAgQIECBAgAABAgQIVFbAI8CV9SxbW/p9eC0Fxgpl33777QZ1pe9raYON9Oq7Qn2FyipVT6E+nwQIECBAgAABAgQIECBAgAABAvUtIABYhfmJK/sKx8cff1xIlv0sXO/QoeHizH79+iXvD4w3xc1EmjvS1/v379+gaHon33S5BoX+76RwPfZl4403LldEHgECBAgQIECAAAECBAgQIECAQJ0LCABWYYJ22mmnYivTpk0rpsslXnnllSQ7PgqcPuLGH4V35o0fPz409x7Axx57LLm1sMFIup5tt902FDYRKZRLXy+kY/0TJkxITtP3FK77JECAAAECBAgQIECAAAECBAgQyIaAAGAV5ukrX/lKWHnllZOW7r777iZbjAG5OXPmJNd33HHHknJf/epXk7x58+aV7BJcKBwfD37kkUeS09133z2k3/kXM+N5zI9HLNfU48Sxn7GdeAwdOjT59D8ECBAgQIAAAQIECBAgQIAAAQLZExAArMKcrbHGGuGb3/xm0tLDDz8cbrvttpJW33///XDKKacU848//vhiupCIday22mrJ6ZlnnlkMFhaux8eHTzzxxFB4jHjEiBGFSw0+C/mLFy8O3/72t4vlC4Vmz54dzjjjjOR09dVXL/a9cN0nAQIECBAgQIAAAQIECBAgQIBAdgQEAKs0V+eff35Yf/31k9aOOOKIcPLJJ4dHH300PP3002Hs2LHJ471/+ctfkusnnHBCiI/dNj569OgRLrvssiT7tddeC1/84hfDTTfdFCZPnhz+53/+JwwePDj89re/Ta4fdthhYdddd21cRXK+2267hUMPPTRJF+6Ln7GeWN/AgQPDjBkzkuuXXnpp6N69e9l6ZBIgQIAAAQIECBAgQIAAAQIECNS/QLtPPj3qv5v56OGUKVNCfBz45ZdfbnJA3/jGN8L1119ffGS4XMFzzz03XHjhhaGpqdt7773DXXfdFTp37lzu9iRv4cKF4cADDwz3339/2TLt27cPZ599djjvvPPKXl/RzPjocWGH4rhrcXp34hWt2/0ECBAgQKBFgUcvabGIAgQqKrDrWRWtTmUECBAgQGBpBfz8vbRS+S5nBWAV5zfuyBtX+V1++eXJ6r24oi9uyBGDX4ccckj4wx/+EMaMGdNs8C92N64mfPLJJ8Phhx+eBNFiHWuttVayAvCWW24J48aNazb4F+vo0qVLUu5Xv/pVcl+8P9YTg3Kx3lh/awX/YvsOAgQIECBAgAABAgQIECBAgACB6ghYAVgdZ600EvAbiEYgTgkQIECgugJWAFbXW2shWAHoW0CAAAECNRLw83eN4OusWSsA62xCdIcAAQIECBAgQIAAAQIECBAgQIBAJQUEACupqS4CBAgQIECAAAECBAgQIECAAAECdSYgAFhnE6I7BAgQIECAAAECBAgQIECAAAECBCopIABYSU11ESBAgAABAgQIECBAgAABAgQIEKgzAQHAOpsQ3SFAgAABAgQIECBAgAABAgQIECBQSQEBwEpqqosAAQIECBAgQIAAAQIECBAgQIBAnQkIANbZhOgOAQIECBAgQIAAAQIECBAgQIAAgUoKCABWUlNdBAgQIECAAAECBAgQIECAAAECBOpMQACwziZEdwgQIECAAAECBAgQIECAAAECBAhUUkAAsJKa6iJAgAABAgQIECBAgAABAgQIECBQZwICgHU2IbpDgAABAgQIECBAgAABAgQIECBAoJICAoCV1FQXAQIECBAgQIAAAQIECBAgQIAAgToTEACsswnRHQIECBAgQIAAAQIECBAgQIAAAQKVFBAArKSmuggQIECAAAECBAgQIECAAAECBAjUmYAAYJ1NiO4QIECAAAECBAgQIECAAAECBAgQqKSAAGAlNdVFgAABAgQIECBAgAABAgQIECBAoM4EBADrbEJ0hwABAgQIECBAgAABAgQIECBAgEAlBQQAK6mpLgIECBAgQIAAAQIECBAgQIAAAQJ1JiAAWGcTojsECBAgQIAAAQIECBAgQIAAAQIEKikgAFhJTXURIECAAAECBAgQIECAAAECBAgQqDMBAcA6mxDdIUCAAAECBAgQIECAAAECBAgQIFBJAQHASmqqiwABAgQIECBAgAABAgQIECBAgECdCXSos/7oDgECBAgQIEDgPwKPXvKftBQBAgQIECBAgAABAsslYAXgcrG5iQABAgQIECBAgAABAgQIECBAgEA2BKwAzMY86SUBAgQIECBAgAABAgRyLTDy4RczM77vDu6Xmb7qKAECBKKAFYC+BwQIECBAgAABAgQIECBAgAABAgRyLCAAmOPJNTQCBAgQIECAAAECBAgQIECAAAECAoC+AwQIECBAgAABAgQIECBAgAABAgRyLCAAmOPJNTQCBAgQIECAAAECBAgQIECAAAECAoC+AwQIECBAgAABAgQIECBAgAABAgRyLCAAmOPJNTQCBAgQIECAAAECBAgQIECAAAECAoC+AwQIECBAgAABAgQIECBAgAABAgRyLCAAmOPJNTQCBAgQIECAAAECBAgQIECAAAECAoC+AwQIECBAgAABAgQIECBAgAABAgRyLNAhx2MzNAIECBAg0OYFRj78YmYMvju4X2b6qqMECBAgQIAAAQIEsiRgBWCWZktfCRAgQIAAAQIECBAgQIAAAQIECCyjgBWAywimOAECBAgQINA6AuVWKw6cMad1GlvBWrfbcI0VrMHtBAgQIECAAAECBKonIABYPWst5USg3A+o9To0j9PV68zoFwECBAgQIECAAAECBAgQqJ6AR4CrZ60lAgQIECBAgAABAgQIECBAgAABAlUXsAKw6uQaJECAAAECBAgQIEAgywKeCMny7Ok7AQIE2qaAAGDbnHejJkCgjQj4AaWNTLRhEiBAgAABAgQIECBAoBkBjwA3g+MSAQIECBAgQIAAAQIECBAgQIAAgawLCABmfQb1nwABAgQIECBAgAABAgQIECBAgEAzAgKAzeC4RIAAAQIECBAgQIAAAQIECBAgQCDrAgKAWZ9B/SdAgAABAgQIECBAgAABAgQIECDQjIBNQJrBcYkAAQIECJQTyNLmKuX6L48AAQIECBAgQIAAgbYlYAVg25pvoyVAgAABAgQIECBAgAABAgQIEGhjAgKAbWzCDZcAAQIECBAgQIAAAQIECBAgQKBtCQgAtq35NloCBAgQIECAAAECBAgQIECAAIE2JuAdgG1swg2XQL0KZOmdat8d3K9eGfWLAAECBAgQIECAAAECBAiUCFgBWEIigwABAgQIECBAgAABAgQIECBAgEB+BAQA8zOXRkKAAAECBAgQIECAAAECBAgQIECgRMAjwCUkMggQIECAAAEC+REY/8qcTAxmuw3XyEQ/dZIAAQJZE8jSq3ayZOu1QFmaLX2NAlYA+h4QIECAAAECBAgQIECAAAECBAgQyLGAAGCOJ9fQCBAgQIAAAQIECBAgQIAAAQIECHgE2HeAAAECBAgQILCMAll5rHYZh6U4AQIECBAgQIBATgWsAMzpxBoWAQIECBAgQIAAAQIECBAgQIAAgSggAOh7QIAAAQIECBAgQIAAAQIECBAgQCDHAgKAOZ5cQyNAgAABAgQIECBAgAABAgQIECAgAOg7QIAAAQIECBAgQIAAAQIECBAgQCDHAjYByfHkGhoBAgQIECBAgECdCDx6Set0ZNezWqdetRIgQIAAAQK5EhAAzNV0GgwBAtUQGPnwi9VoRhsECBAgQGCFBbL0d9Z3B/db4fGqgEC1BLL0/61qmWiHAIH6FhAArO/50TsCBAgQIECAQJsQGP/KnMyMc7sN18hMX7PUUQGVLM2WvhIgQIBA1gS8AzBrM6a/BAgQIECAAAECBAgQIECAAAECBJZBQABwGbAUJUCAAAECBAgQIECAAAECBAgQIJA1AY8AZ23G9JcAAQI5FfDoV04n1rAIECBAgAABAgQIEKi5gBWANZ8CHSBAgAABAgQIECBAgAABAgQIECDQegICgK1nq2YCBAgQIECAAAECBAgQIECAAAECNRfwCHDNp0AHCBAgQIAAAQIECBAg0DoCXrHROq5qJUCAQNYEBACzNmP6S4AAAQIECBAgUFOB8a/MqWn76cYnLH4xfSpNgAABAgQIECgr4BHgsiwyCRAgQIAAAQIECBAgQIAAAQIECORDQAAwH/NoFAQIECBAgAABAgQIECBAgAABAgTKCggAlmWRSYAAAQIECBAgQIAAAQIECBAgQCAfAgKA+ZhHoyBAgAABAgQIECBAgAABAgQIECBQVkAAsCyLTAIECBAgQIAAAQIECBAgQIAAAQL5ELALcD7m0SgIlBUY+bCdAcvCyCRAgAABAgQIECBAgAABAm1IwArANjTZhkqAAAECBAgQIECAAAECBAgQIND2BAQA296cGzEBAgQIECBAgAABAgQIECBAgEAbEhAAbEOTbagECBAgQIAAAQIECBAgQIAAAQJtT0AAsO3NuRETIECAAAECBAgQIECAAAECBAi0IQEBwDY02YZKgAABAgQIECBAgAABAgQIECDQ9gQEANvenBsxAQIECBAgQIAAAQIECBAgQIBAGxIQAKyDyT799NNDu3btiv/98Y9/bLFXv/vd78L+++8fevfuHTp16pR8xvOYv7TH4sWLw89//vOw0047hTXXXDN06dIlbLzxxuFb3/pWeOGFF5a2GuUIECBAgAABAgQIECBAgAABAgTqWKBDHfetTXTtueeeCyNHjlzqsX7yySdJgG7UqFEN7nnjjTfCb37zm+S/4447Llx//fVJQLFBodTJnDlzwpAhQ8Kf//znVG4I06ZNS/4bO3ZsuPbaa8M3vvGNBtedECBAgAABAgQIECBAgAABAgQIZEvACsAazteSJUvCscceG+JKvLXWWmupevKDH/wgFIJ/W221Vbj11lvDxIkTk894Ho94/eyzz26yvo8//jhZPVgI/sWVgw888EASDLzqqquSvixatCjEQOKDDz7YZD0uECBAgAABAgQIECBAgAABAgQI1L+AAGAN5ygG2yZNmhQ222yzMGzYsBZ78vLLL4cf/ehHSbltttkm/OlPfwqHHnpo2HbbbZPPJ598MsT8eFx22WXJSr7kpNH/3HzzzeHxxx9Pck888cRw1113hS9/+cthwIAB4eSTT07q/cxnPhNioDCexwClgwABAgQIECBAgAABAgQIECBAIJsCAoA1mrfXX3+9uErvuuuuCx07dmyxJ/FR4UIw7uqrr07e2Ze+qWvXriHmxyOWu/LKK9OXi+nLL788SXfv3j0U0sWLnybiewDPOuusJOull14K9957b/qyNAECBAgQIECAAAECBAgQIECAQIYEBABrNFlx5d38+fPDUUcdFXbZZZcWexHf/VcIxMUVgwMHDix7T8zfdNNNk2v33HNPiPeljxjQK2zwccghh4QYNCx3HH300cXsu+++u5iWIECAAAECBAgQIECAAAECBAgQyJaAAGAN5uuOO+4I9913X+jRo0fZFXjlujR9+vQQN/qIx84771yuSDGvcH3mzJnh1VdfLebHxBNPPFE8L5QrZqQS66yzTujXr1+SEx8tdhAgQIAAAQIECBAgQIAAAQIECGRTQACwyvP27rvvhuHDhyetxvf0rbnmmkvVgylTphTLxRWAzR3p6+n74j3p83S5cvUVrsfHlT/44INyReQRIECAAAECBAgQIECAAAECBAjUuUCHOu9f7rp3+umnh7feeitsv/32S7XxRwEgBuEKR+/evQvJsp99+vQp5qfvi5np86WtJz5GHFcTFh4tLlbeTCKWb+6YNWtWc5ddI0CAAAECBAgQIECAAAECBAgQqJCAAGCFIJemmvgo7ejRo0OHDh3C9ddfH9q1a7c0tyVl3n///WLZbt26FdPlEqusskoxO75nMH1Uqp50neXS6SBkuevyCBAgQIAAAQIECBAgQIAAAQIEqiPgEeDqOIePPvooHHfcccmmHN/97nfD5z//+WVq+cMPPyyWb2nH4E6dOhXLLly4sJiOiUrV06BSJwQIECBAgAABAgQIECBAgAABAnUrYAV9Bvu4AAA6r0lEQVRglabm4osvTt6/t/7664dzzz13mVvt3Llz8Z4YTGzuWLRoUfFyly5diumYaFxP+rxBwU9PmquncdnG5+lHjRtfi+fxEeABAwaUuySPAAECBAgQIECAAAECBAgQIECgggICgBXEbKqqqVOnhksuuSS5fPXVV4f0I7pN3dM4f9VVVy1mNX6st3jh/xLpDTsaPy7cuJ7mAoDN1dO4zcbnLb1fsHF55wQIECBAgAABAgQIECBAgAABAq0jIADYOq4Nah05cmTyCPCGG24YFixYEG677bYG1+PJ888/X8z7wx/+kGwUEjP23XffJGCYDqi1tMFGevVd43fxNa6nZ8+exXYbJwr1xHcVpu9rXM45AQIECBAgQIAAAQIECBAgQIBA/QoIAFZhbgqP0r7yyivhsMMOa7HFCy+8sFhm+vTpSQBw8803L+bFFYXNHenr/fv3b1C0cT1bbrllg+vpk0I9MYi4PKsW03VJEyBAgAABAgQIECBAgAABAgQI1EbAJiC1cV/mVjfYYIPQq1ev5L7HHnus2fsff/zx5Pp6660X+vbt26DsDjvsUDxvrp633norvPjii0nZQYMGFe+RIECAAAECBAgQIECAAAECBAgQyJaAAGAV5mvs2LHJ7r+ffPJJk5/pjUEeffTRYrlCAC8+hrvffvslvY0r8yZMmFC25zG/sHIvlo/3pY9+/fqFwqrAO+64I3kkOX29kI59LhxDhw4tJH0SIECAAAECBAgQIECAAAECBAhkTEAAMEMTdsopp4QOHf791PbJJ58cFi5c2KD38TzmxyOWi+XLHSNGjEiy33nnnXD66aeXFJk2bVpx05KNNtooCACWEMkgQIAAAQIECBAgQIAAAQIECGRGQAAwM1MVQly9VwjeTZ48OcRHc2+//fYQ0/Eznsd0PE477bSwySablB3dUUcdlZSNF6+55ppw4IEHhgcffDBMnDgx/OxnPwvbb799mDdvXmjfvn2IuxYXgo5lK5NJgAABAgQIECBAgAABAgQIECBQ1wI2Aanr6Snt3A9/+MPw9ttvhxtvvDE8++yz4dBDDy0pNGzYsHDRRReV5BcyVlpppXDPPfeEvffeO0yaNCncddddyX+F6/GzY8eOSTBwr732SmdLEyBAgAABAgQIECBAgAABAgQIZEzACsCsTdinq/LGjBkTxo0bl7wTMG4MEoN18TO+8+/+++8Po0ePTlbvNTe0nj17hqeeeipce+21IW4MssYaa4TOnTuHDTfcMBx77LHhmWeeST6bq8M1AgQIECBAgAABAgQIECBAgACB+hdo9+nGFJ/Ufzf1MG8CM2fODH369EmG9frrr4fevXtnZogjH/737siZ6bCOEiBAIMMCA2eMynDvdZ1A6wtMWP+41m9ECwQIECBQIvDdwf1K8uo1I8s/f9eraRb75RHgLM6aPhMgQIAAgToTEKirswnRHQIECBAgQIAAAQIpAY8ApzAkCRAgQIAAAQIECBAgQIAAAQIECORNQAAwbzNqPAQIECBAgAABAgQIECBAgAABAgRSAgKAKQxJAgQIECBAgAABAgQIECBAgAABAnkTEADM24waDwECBAgQIECAAAECBAgQIECAAIGUgABgCkOSAAECBAgQIECAAAECBAgQIECAQN4EBADzNqPGQ4AAAQIECBAgQIAAAQIECBAgQCAlIACYwpAkQIAAAQIECBAgQIAAAQIECBAgkDcBAcC8zajxECBAgAABAgQIECBAgAABAgQIEEgJCACmMCQJECBAgAABAgQIECBAgAABAgQI5E1AADBvM2o8BAgQIECAAAECBAgQIECAAAECBFICAoApDEkCBAgQIECAAAECBAgQIECAAAECeRMQAMzbjBoPAQIECBAgQIAAAQIECBAgQIAAgZSAAGAKQ5IAAQIECBAgQIAAAQIECBAgQIBA3gQEAPM2o8ZDgAABAgQIECBAgAABAgQIECBAICUgAJjCkCRAgAABAgQIECBAgAABAgQIECCQNwEBwLzNqPEQIECAAAECBAgQIECAAAECBAgQSAkIAKYwJAkQIECAAAECBAgQIECAAAECBAjkTUAAMG8zajwECBAgQIAAAQIECBAgQIAAAQIEUgICgCkMSQIECBAgQIAAAQIECBAgQIAAAQJ5ExAAzNuMGg8BAgQIECBAgAABAgQIECBAgACBlIAAYApDkgABAgQIECBAgAABAgQIECBAgEDeBAQA8zajxkOAAAECBAgQIECAAAECBAgQIEAgJSAAmMKQJECAAAECBAgQIECAAAECBAgQIJA3AQHAvM2o8RAgQIAAAQIECBAgQIAAAQIECBBICQgApjAkCRAgQIAAAQIECBAgQIAAAQIECORNQAAwbzNqPAQIECBAgAABAgQIECBAgAABAgRSAgKAKQxJAgQIECBAgAABAgQIECBAgAABAnkTEADM24waDwECBAgQIECAAAECBAgQIECAAIGUgABgCkOSAAECBAgQIECAAAECBAgQIECAQN4EBADzNqPGQ4AAAQIECBAgQIAAAQIECBAgQCAlIACYwpAkQIAAAQIECBAgQIAAAQIECBAgkDcBAcC8zajxECBAgAABAgQIECBAgAABAgQIEEgJCACmMCQJECBAgAABAgQIECBAgAABAgQI5E1AADBvM2o8BAgQIECAAAECBAgQIECAAAECBFICAoApDEkCBAgQIECAAAECBAgQIECAAAECeRMQAMzbjBoPAQIECBAgQIAAAQIECBAgQIAAgZSAAGAKQ5IAAQIECBAgQIAAAQIECBAgQIBA3gQEAPM2o8ZDgAABAgQIECBAgAABAgQIECBAICUgAJjCkCRAgAABAgQIECBAgAABAgQIECCQNwEBwLzNqPEQIECAAAECBAgQIECAAAECBAgQSAkIAKYwJAkQIECAAAECBAgQIECAAAECBAjkTUAAMG8zajwECBAgQIAAAQIECBAgQIAAAQIEUgICgCkMSQIECBAgQIAAAQIECBAgQIAAAQJ5ExAAzNuMGg8BAgQIECBAgAABAgQIECBAgACBlIAAYApDkgABAgQIECBAgAABAgQIECBAgEDeBAQA8zajxkOAAAECBAgQIECAAAECBAgQIEAgJSAAmMKQJECAAAECBAgQIECAAAECBAgQIJA3AQHAvM2o8RAgQIAAAQIECBAgQIAAAQIECBBICQgApjAkCRAgQIAAAQIECBAgQIAAAQIECORNQAAwbzNqPAQIECBAgAABAgQIECBAgAABAgRSAgKAKQxJAgQIECBAgAABAgQIECBAgAABAnkTEADM24waDwECBAgQIECAAAECBAgQIECAAIGUQIdUWpIAAQIECBAgQIAAgQwJDJwxqlV6O2H941qlXpUSIECAAAECtRGwArA27lolQIAAAQIECBAgQIAAAQIECBAgUBUBAcCqMGuEAAECBAgQIECAAAECBAgQIECAQG0EBABr465VAgQIECBAgAABAgQIECBAgAABAlUREACsCrNGCBAgQIAAAQIECBAgQIAAAQIECNRGQACwNu5aJUCAAAECBAgQIECAAAECBAgQIFAVAQHAqjBrhAABAgQIECBAgAABAgQIECBAgEBtBAQAa+OuVQIECBAgQIAAAQIECBAgQIAAAQJVERAArAqzRggQIECAAAECBAgQIECAAAECBAjURkAAsDbuWiVAgAABAgQIECBAgAABAgQIECBQFQEBwKowa4QAAQIECBAgQIAAAQIECBAgQIBAbQQEAGvjrlUCBAgQIECAAAECBAgQIECAAAECVREQAKwKs0YIECBAgAABAgQIECBAgAABAgQI1EZAALA27lolQIAAAQIECBAgQIAAAQIECBAgUBUBAcCqMGuEAAECBAgQIECAAAECBAgQIECAQG0EBABr465VAgQIECBAgAABAgQIECBAgAABAlUREACsCrNGCBAgQIAAAQIECBAgQIAAAQIECNRGQACwNu5aJUCAAAECBAgQIECAAAECBAgQIFAVAQHAqjBrhAABAgQIECBAgAABAgQIECBAgEBtBAQAa+OuVQIECBAgQIAAAQIECBAgQIAAAQJVERAArAqzRggQIECAAAECBAgQIECAAAECBAjURkAAsDbuWiVAgAABAgQIECBAgAABAgQIECBQFQEBwKowa4QAAQIECBAgQIAAAQIECBAgQIBAbQQEAGvjrlUCBAgQIECAAAECBAgQIECAAAECVREQAKwKs0YIECBAgAABAgQIECBAgAABAgQI1EZAALA27lolQIAAAQIECBAgQIAAAQIECBAgUBUBAcCqMGuEAAECBAgQIECAAAECBAgQIECAQG0EBABr465VAgQIECBAgAABAgQIECBAgAABAlUREACsCrNGCBAgQIAAAQIECBAgQIAAAQIECNRGQACwSu7PPPNMuPjii8Nee+0V+vTpEzp16hS6desW+vXrF44++ujwxBNPLFNPfve734X9998/9O7dO6krfsbzmL+0x+LFi8PPf/7zsNNOO4U111wzdOnSJWy88cbhW9/6VnjhhReWthrlCBAgQIAAAQIECBAgQIAAAQIE6lig3SefHnXcv1x0beeddw6PP/54i2M54ogjwujRo0PHjh2bLBunKwboRo0a1WSZ4447Llx//fWhXbt2TZaZM2dOGDJkSPjzn/9ctkwMUF577bXhG9/4RtnrK5o5c+bMJBAa63n99deTQOaK1lmt+0c+/GK1mtIOAQIEMiMwcEbTfy9lZhA6SoBAUWDC+scV0xIECBAgUCrw3cH9SjPrNCfLP3/XKWkmu2UFYBWm7Y033kha6dWrVxg+fHi48847w8SJE8P48ePDT37yk7Deeusl12+++eZkNWBzXfrBD35QDP5ttdVW4dZbb03qip/xPB4xOHj22Wc3Wc3HH3+crBYsBP/iysEHHnggCQZeddVVYa211gqLFi0KMZD44IMPNlmPCwQIECBAgAABAgQIECBAgAABAvUvYAVgFeZon332CUceeWQ44IADwkorrVTS4uzZs8OgQYPCiy/+e2VZXC244447lpR7+eWXQ//+/UN8dHebbbZJVhXGx3YLx4IFC0JcbTh58uTQoUOHMHXq1LDRRhsVLhc/x44dG4455pjk/MQTTwzXXHNN8VpMxHa23nrrMG/evLDJJpskjwPH+ip5ZPk3EFYAVvKboC4CBPIiYAVgXmbSOAj8W8AKQN8EAgQINC9gBWDzPq7Wn4AVgFWYk/vuuy8cfPDBZYN/sfmePXuGK664otiTuEKw3DFy5Mgk+BevXX311ck7+9LlunbtmuTHvBgkvPLKK9OXi+nLL788SXfv3j0U0sWLnybiewDPOuusJOull14K9957b/qyNAECBAgQIECAAAECBAgQIECAQIYEBADrZLJ22WWXYk+mTZtWTBcS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AAECBColIABYKUn1ECBAgAABAgQIECBAgAABAgQIEKhDAQHAOpwUXSJAgAABAgQIECBAgAABAgQIECBQKQEBwEpJqocAAQIECBAgQIAAAQIECBAgQIBAHQoIANbhpOgSAQIECBAgQIAAAQIECBAgQIAAgUoJCABWSlI9BAgQIECAAAECBAgQIECAAAECBOpQQACwDidFlwgQIECAAAECBAgQIECAAAECBAhUSkAAsFKS6iFAgAABAgQIECBAgAABAgQIECBQhwICgHU4KbpEgAABAgQIECBAgAABAgQIECBAoFICAoCVklQPAQIECBAgQIAAAQIECBAgQIAAgToUEACsw0nRJQIECBAgQIAAAQIECBAgQIAAAQKVEhAArJSkeggQIECAAAECBAgQIECAAAECBAjUoYAAYB1Oii4RIECAAAECBAgQIECAAAECBAgQqJSAAGClJNVDgAABAgQIECBAgAABAgQIECBAoA4FBADrcFJ0iQABAgQIECBAgAABAgQIECBAgEClBAQAKyWpHgIECBAgQIAAAQIECBAgQIAAAQJ1KCAAWIeToksECBAgQIAAAQIECBAgQIAAAQIEKiUgAFgpSfUQIECAAAECBAgQIECAAAECBAgQqEMBAcA6nBRdIkCAAAECBAgQIECAAAECBAgQIFApAQHASkmqhwABAgQIECBAgAABAgQIECBAgEAdCggA1uGk6BIBAgQIECBAgAABAgQIECBAgACBSgkIAFZKUj0ECBAgQIAAAQIECBAgQIAAAQIE6lBAALAOJ0WXCBAgQIAAAQIECBAgQIAAAQIECFRKQACwUpLqIUCAAAECBAgQIECAAAECBAgQIFCHAgKAdTgpukSAAAECBAgQIECAAAECBAgQIECgUgICgJWSVA8BAgQIECBAgAABAgQIECBAgACBOhQQAKzDSdElAgQIECBAgAABAgQIECBAgAABApUSEACslKR6CBAgQIAAAQIECBAgQIAAAQIECNShQIc67JMuESBAgACBNi0wcMaoNj1+gydAgAABAgQIECBAoLICVgBW1lNtBAgQIECAAAECBAgQIECAAAECBOpKQACwrqZDZwgQIECAAAECBAgQIECAAAECBAhUVkAAsLKeaiNAgAABAgQIECBAgAABAgQIECBQVwICgHU1HTpDgAABAgQIECBAgAABAgQIECBAoLICAoCV9VQbAQIECBAgQIAAAQIECBAgQIAAgboSEACsq+nQGQIECBAgQIAAAQIECBAgQIAAAQKVFRAArKyn2ggQIECAAAECBAgQIECAAAECBAjUlYAAYF1Nh84QIECAAAECBAgQIECAAAECBAgQqKyAAGBlPdVGgAABAgQIECBAgAABAgQIECBAoK4EOtRVb3SGAAECBAgQIECAAIFcCwycMapVxjdh/eNapV6VEiBAgACBPAhYAZiHWTQGAgQIECBAgAABAgQIECBAgAABAk0ICAA2ASObAAECBAgQIECAAAECBAgQIECAQB4EBADzMIvGQIAAAQIECBAgQIAAAQIECBAgQKAJAQHAJmBkEyBAgAABAgQIECBAgAABAgQIEMiDgABgHmbRGAgQIECAAAECBAgQIECAAAECBAg0ISAA2ASMbAIECBAgQIAAAQIECBAgQIAAAQJ5EBAAzMMsGgMBAgQIECBAgAABAgQIECBAgACBJgQEAJuAkU2AAAECBAgQIECAAAECBAgQIEAgDwICgHmYRWMgQIAAAQIECBAgQIAAAQIECBAg0ISAAGATMLIJECBAgAABAgQIECBAgAABAgQI5EFAADAPs2gMBAgQIECAAAECBAgQIECAAAECBJoQEABsAkY2AQIECBAgQIAAAQIECBAgQIAAgTwICADmYRaNgQABAgQIECBAgAABAgQIECBAgEATAgKATcDIJkCAAAECBAgQIECAAAECBAgQIJAHAQHAPMyiMRAgQIAAAQIECBAgQIAAAQIECBBoQkAAsAkY2QQIECBAgAABAgQIECBAgAABAgTyINAhD4MwBgIECBAgUAuBgTNG1aJZbRIgQIAAAQIECBAgQGCZBKwAXCYuhQkQIECAAAECBAgQIECAAAECBAhkS0AAMFvzpbcECBAgQIAAAQIECBAgQIAAAQIElklAAHCZuBQmQIAAAQIECBAgQIAAAQIECBAgkC0BAcBszZfeEiBAgAABAgQIECBAgAABAgQIEFgmAQHAZeJSmAABAgQIECBAgAABAgQIECBAgEC2BAQAszVfekuAAAECBAgQIECAAAECBAgQIEBgmQQEAJeJS2ECBAgQIECAAAECBAgQIECAAAEC2RIQAMzWfOktAQIECBAgQIAAAQIECBAgQIAAgWUSEABcJi6FCRAgQIAAAQIECBAgQIAAAQIECGRLQAAwW/OltwQIECBAgAABAgQIECBAgAABAgSWSUAAcJm4FCZAgAABAgQIECBAgAABAgQIECCQLQEBwGzNl94SIECAAAECBAgQIECAAAECBAgQWCYBAcBl4lKYAAECBAgQIECAAAECBAgQIECAQLYEBACzNV96S4AAAQIECBAgQIAAAQIECBAgQGCZBAQAl4lLYQIECBAgQIAAAQIECBAgQIAAAQLZEuiQre7qLQECBAgQIECAAAECBEoFBs4YVZpZgZwJ6x9XgVpUQYAAAQIEaitgBWBt/bVOgAABAgQIECBAgAABAgQIECBAoFUFBABblVflBAgQIECAAAECBAgQIECAAAECBGorIABYW3+tEyBAgAABAgQIECBAgAABAgQIEGhVAQHAVuVVOQECBAgQIECAAAECBAgQIECAAIHaCggA1ta/LlqfMWNGGDFiROjfv39YZZVVQo8ePcKAAQPCj3/847BgwYK66KNOECBAgAABAgQIECBAgAABAgQILJ+AXYCXzy03d40bNy587WtfC++9915xTDHoN2nSpOS/0aNHh/vvvz9suOGGxesSBAgQIECAAAECBAgQIECAAAEC2RGwAjA7c1Xxnj733HPh4IMPToJ/3bp1Cz/84Q/DU089FX7/+9+HY489Nmnv73//exgyZEiYP39+xdtXIQECBAgQIECAAAECBAgQIECAQOsLWAHY+sZ128Ipp5ySPOLboUOH8NBDD4Xtttuu2NfddtstbLLJJuH0008PU6dODT/5yU/COeecU7wuQYAAAQIECBAgQIAAAQIECBAgkA0BKwCzMU8V72V8xPePf/xjUu+wYcMaBP8KjZ166qnJewHj+ZVXXhn+9a9/FS75JECAAAECBAgQIECAAAECBAgQyIiAFYAZmahKd/Oee+4pVnnMMccU0+lE+/btw5FHHhnOOuusMHfu3CRgOHjw4HQRaQIECGRCYOCMUZnop04SIECAQP0JtObfIRPWP67+BqxHBAgQIJBLAQHAXE5ry4N64oknkkJx19+tt966yRt23nnn4rUnn3wyCAAWOSQIEKiwQGv+gFXhrqqOAAECBAgQIECAAAECmRIQAMzUdFWus1OmTEkq23jjjUN8B2BTx2abbVa8VLinmCFBgECbFBCoa5PTbtAECBAgQIAAAQIECGRYoOnIT4YHpevNC3z44Ydh9uzZSaHevXs3W7h79+4hrhL84IMPwuuvv95s2fTFmTNnpk9L0um6Zs2aVXK9njPe/edb9dw9fSPQ6gJvv/N+q7ehAQIECBAg0BYE3u3i35VtYZ6NMZ8CM2d2zczA0j9zL168ODP91tHKCggAVtYzE7W9//5/fnjv1q1bi30uBADnz5/fYtlCgT59+hSSLX4OGDCgxTIKECBAgAABAgQIEMifgHfU5m9OjaitCFyQ0YH+85//DH379s1o73V7RQTsArwiehm9N64ALBwdO3YsJJv87NSpU3Jt4cKFTZZxgQABAgQIECBAgAABAgQIECBAoD4FrACsz3lp1V517ty5WP9HH31UTDeVWLRoUXKpS5cuTRUpyU8/4lty8dOMGIScOnVqWHvttcOaa67Z7HsIy91fi7y4bLqwWnHixIlh3XXXrUU3tJkzAd+rnE1oHQ3Hd6uOJiNHXfG9ytFk1tFQfK/qaDJy1hXfrZxNaJ0MJ4vfq/jYb1z5F4/Pf/7zdSKpG9UWEACstngdtLfqqqsWe7E0j/XG9//FY2keFy5U3NK7BWO5uAFJVo8Y/FuaMWZ1fPpdGwHfq9q4t4VWfbfawixXf4y+V9U3bwst+l61hVmuzRh9t2rjnvdWs/S98thv3r+NLY/PI8AtG+WuRFwB2LNnz2RcLW3WMXfu3GQDkFh4Wd7rlzs0AyJAgAABAgQIECBAgAABAgQIZFRAADCjE7ei3e7fv39Sxcsvvxya2wUoPqZbOAr3FM59EiBAgAABAgQIECBAgAABAgQI1L+AAGD9z1Gr9HCHHXZI6o2P9z799NNNtvHYY48Vrw0aNKiYliBAgAABAgQIECBAgAABAgQIEMiGgABgNuap4r386le/WqzzpptuKqbTiSVLloRf/vKXSdbqq68edt111/RlaQIECBAgQIAAAQIECBAgQIAAgQwICABmYJJao4txN9sdd9wxqXrMmDFh/PjxJc1cccUVYcqUKUn+8OHDw8orr1xSRgYBAgQIECBAgAABAgQIECBAgEB9C9gFuL7np1V799Of/jTEx3oXLlwYvvSlL4Xvfe97ySq/eH7bbbeFUaNGJe3369cvnHrqqa3aF5UTIECAAAECBAgQIECAAAECBAi0joAAYOu4ZqLWrbbaKtx+++3h61//epg3b14SAGzc8Rj8GzduXFh11VUbX3JOgAABAgQIECBAgAABAgQIECCQAYF2n3x6ZKCfutiKAq+99lqIqwFjoG/mzJmhY8eOYeONNw4HHXRQOOmkk0LXrl1bsXVVEyBAgAABAgQIECBAgAABAgQItKaAAGBr6qqbAAECBAgQIECAAAECBAgQIECAQI0FbAJS4wnQPAECBAgQIECAAAECBAgQIECAAIHWFBAAbE1ddRMgQIAAAQIECBAgQIAAAQIECBCosYAAYI0nQPMECBAgQIAAAQIECBAgQIAAAQIEWlNAALA1ddVNgAABAgQIECBAgAABAgQIECBAoMYCAoA1ngDNEyBAgAABAgQIECBAgAABAgQIEGhNAQHA1tRVNwECBAgQIECAAAECBAgQIECAAIEaCwgA1ngCNE+AAAECBAgQIECAAAECBAgQIECgNQUEAFtTV90ECBAgQIAAAQIECBAgQIAAAQIEaiwgAFjjCdA8AQIECBAgQIAAAQIECBAgQIAAgdYUEABsTV11tymBcePGhfPOOy8MGTIk9O/fP/Ts2TOsvPLKoXv37mHrrbcOp556avj73//epkwMdsUFZsyYEa677rpwyCGHhE033TSsssoqoXPnzqF3795hv/32C7feemtYvHjxijekhjYlMH/+/PD444+HH//4x+Hggw8OG2ywQWjXrl3yX9++fduUhcEuvUD882jEiBHJ33Hxz6IePXqEAQMGJN+jBQsWLH1FShL4VODtt98O9913XzjnnHPCXnvtlfy7qfDn0NFHH82IwHIJPPPMM+Hiiy9OvlN9+vQJnTp1Ct26dQv9+vUL8Xv1xBNPLFe9bmq7AvPmzQu33XZb8rPczjvvHDbeeOOw2mqrhY4dO4a11lor7LLLLuFHP/pRmDNnTttFMvLMCLT75NMjM73VUQJ1KhADMDHY19IRy1xwwQXhzDPPbKmo6wSSH4ouuuii0NIf09tss0246667wvrrr0+NwFIJ7LrrruGPf/xj2bKf/exnw6uvvlr2msy2KxB/yfW1r30tvPfee2UR4i8o7r///rDhhhuWvS6TQGOBGOxr6jjqqKPC2LFjm7osn0BZgRicib/cauk44ogjwujRo5MATktlXSfwyCOPhMGDB7cIERd//Pd//3fYc889WyyrAIFaCXSoVcPaJZA3gfiboPgboC9+8YvJD0Drrrtu6Nq1a3jzzTeTH7RvvPHG5Aens846K6y++urhW9/6Vt4I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QIAAAQIECBAgQIAAAQIECAiANkCAAAECBAgQIECAAAECBAgQIEBgLCAAjp/rNAIECBAgQIAAAQIECBAgQIAAAQICoA0QIECAAAECBAgQIECAAAECBAgQGAsIgOPnOo0AAQIECBAgQIAAAQIECBAgQICAAGgDBAgQIECAAAECBAgQIECAAAECBMYCAuD4uU4jQIAAAQIECBAgQIAAAQIECBAgIADaAAECBAgQIECAAAECBAgQIECAAIGxgAA4fq7TCBAgQIAAAQIECBAgQIAAAQIECAiANkCAAAECBAgQIECAAAECBAgQIEBgLCAAjp/rNAIECBAgQIAAAQIECBAgQIAAAQICoA0QIECAAAECBAgQIECAAAECBAgQGAsIgOPnOo0AAQIECBAgQIAAAQIECBAgQICAAGgDBAgQIECAAAECBAgQIECAAAECBMYCAuD4uU4jQIAAAQIECBAgQIAAAQIECBAgIADaAAECBAgQIECAAAECBAgQIECAAIGxgAA4fq7TCBAgQIAAAQIECBAgQIAAAQIECAiANkCAAAECBAgQIECAAAECBAgQIEBgLCAAjp/rNAIECBAgQIAAAQIECBAgQIAAAQICoA0QIECAAAECBAgQIECAAAECBAgQGAsIgOPnOo0AAQIECBAgQIAAAQIECBAgQICAAGgDBAgQIECAAAECBAgQIECAAAECBMYCAuD4uU4jQIAAAQIECBAgQIAAAQIECBAgIADaAAECBAgQIECAAAECBAgQIECAAIGxgAA4fq7TCBAgQIAAAQIECBAgQIAAAQIECAiANkCAAAECBAgQIECAAAECBAgQIEBgLCAAjp/rNAIECBAgQIAAAQIECBAgQIAAAQICoA0QIECAAAECBAgQIECAAAECBAgQGAsIgOPnOo0AAQIECBAgQIAAAQIECBAgQICAAGgDBAgQIECAAAECBAgQIECAAAECBMYCAuD4uU4jQIAAAQIECBAgQIAAAQIECBAgIADaAAECBAgQIECAAAECBAgQIECAAIGxgAA4fq7TCBAgQIAAAQIECBAgQIAAAQIECAiANkCAAAECBAgQIECAAAECBAgQIEBgLCAAjp/rNAIECBAgQIAAAQIECBAgQIAAAQICoA0QIECAAAECBAgQIECAAAECBAgQGAsIgOPnOo0AAQIECBAgQIAAAQIECBAgQICAAGgDBAgQIECAAAECBAgQIECAAAECBMYCAuD4uU4jQIAAAQIECBAgQIAAAQIECBAgIADaAAECBAgQIECAAAECBAgQIECAAIGxgAA4fq7TCBAgQIAAAQIECBAgQIAAAQIECAiANkCAAAECBAgQIECAAAECBAgQIEBgLCAAjp/rNAIECBAgQIAAAQIECBAgQIAAAQICoA0QIECAAAECBAgQIECAAAECBAgQGAsENYoZHyzzRasAAAAASUVORK5CYII=" width="640">
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>The observed data sample y has changed our beliefs regarding x from the depicted prior distribution into the depicted posterior distribution via Bayes' rule.</p>
-
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Approach-3:-Bayesian-(unknown-variance)">Approach 3: Bayesian (unknown variance)<a class="anchor-link" href="#Approach-3:-Bayesian-(unknown-variance)">¶</a></h2><p>In order to model unknown variance we just need to change the precision variable (tau) into a stochastic variable, then ensure that tau is included in the full pymc model like this:</p>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#(1) Build model</span>
-<span class="n">x</span>          <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">"x"</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>       <span class="c1">#prior distribution for the population mean</span>
-<span class="n">tau</span>        <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">"tau"</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="c1">#prior distribution for precision</span>
-<span class="n">data_model</span> <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">"data_model"</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>  <span class="c1">#model of the observations</span>
-
-<span class="c1">#(2) Conduct inference:</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Model</span><span class="p">([</span><span class="n">data_model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">tau</span><span class="p">])</span>   <span class="c1">#full model containing data model and all stochastic variables</span>
-<span class="n">mcmc</span>  <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">MCMC</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>               <span class="c1">#MCMC sampler</span>
-<span class="n">mcmc</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">iter</span><span class="o">=</span><span class="mi">11000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>     <span class="c1">#MC sampling</span>
-<span class="n">post</span>  <span class="o">=</span> <span class="n">mcmc</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)[:]</span>             <span class="c1">#posterior distribution for the population mean</span>
-<span class="n">bmean</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>                    <span class="c1">#Bayesian estimate of the population mean</span>
-<span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'Bayesian estimate of the population mean (unknown variance):'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">bmean</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-
-
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre> [-----------------100%-----------------] 11000 of 11000 complete in 0.7 sec
-Bayesian estimate of the population mean (unknown variance):
--0.028969135243
-</pre>
-</div>
-</div>
-
-</div>
-
-</div>
-
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Adding tau as a stochastic variable has not greatly affected the results.</p>
-
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Systematic-comparison-between-Bayesian-and-LS-approaches">Systematic comparison between Bayesian and LS approaches<a class="anchor-link" href="#Systematic-comparison-between-Bayesian-and-LS-approaches">¶</a></h2><p>The analyses above represent a single dataset, single sample size, and single prior distributions, and results showed that the Bayesian results were somewhat more accurate. How do Bayesian and LS approaches compare for arbitrary datasets, sample sizes, priors, etc.?  To answer that question comprehenively would require millions of simulations. Here we shall consider only effects of dataset, and we'll check whether Bayesian or LS approaches perform better.</p>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#create a function for estimating population mean using Bayesian inference:</span>
-<span class="k">def</span> <span class="nf">bayesian_mean</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">iter</span><span class="o">=</span><span class="mi">11000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
-    <span class="c1">#build model:</span>
-    <span class="n">x</span>       <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">"x"</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-    <span class="n">tau</span>     <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="s2">"tau"</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
-    <span class="n">dmodel</span>  <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s2">"data_model"</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
-    <span class="c1">#conduct inference:</span>
-    <span class="n">model</span>   <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">Model</span><span class="p">([</span><span class="n">data_model</span><span class="p">,</span> <span class="n">x</span><span class="p">])</span>
-    <span class="n">mcmc</span>    <span class="o">=</span> <span class="n">pymc</span><span class="o">.</span><span class="n">MCMC</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>           
-    <span class="n">mcmc</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">iter</span><span class="o">=</span><span class="nb">iter</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="n">burn</span><span class="p">,</span> <span class="n">progress_bar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">post</span>    <span class="o">=</span> <span class="n">mcmc</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)[:]</span>
-    <span class="k">return</span> <span class="n">post</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-
-
-<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">nDatasets</span>   <span class="o">=</span> <span class="mi">20</span>   <span class="c1">#number of datasets to generate</span>
-<span class="n">n</span>           <span class="o">=</span> <span class="mi">0</span>    <span class="c1">#number of datasets for which the Bayesian estimate is more accurate</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nDatasets</span><span class="p">):</span>
-    <span class="n">y</span>       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
-    <span class="n">mean_ls</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-    <span class="n">mean_b</span>  <span class="o">=</span> <span class="n">bayesian_mean</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">iter</span><span class="o">=</span><span class="mi">110000</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">mean_ls</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mean_b</span><span class="p">)):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="s1">'LS'</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="s1">'Bayesian'</span>
-        <span class="n">n</span>     <span class="o">+=</span> <span class="mi">1</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">'Dataset </span><span class="si">%d</span><span class="s1">.  LS: </span><span class="si">%.5f</span><span class="s1">, Bayesian: </span><span class="si">%.5f</span><span class="s1"> (</span><span class="si">%s</span><span class="s1"> more accurate)'</span> <span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">mean_ls</span><span class="p">,</span> <span class="n">mean_b</span><span class="p">,</span> <span class="n">result</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'Bayesian more accurate in </span><span class="si">%d</span><span class="s1">/</span><span class="si">%d</span><span class="s1"> datasets.'</span> <span class="o">%</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">nDatasets</span><span class="p">))</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-
-
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Dataset 0.  LS: 1.45028, Bayesian: 1.44847 (Bayesian more accurate)
-Dataset 1.  LS: 0.15133, Bayesian: 0.15841 (LS more accurate)
-Dataset 2.  LS: -0.72543, Bayesian: -0.72868 (LS more accurate)
-Dataset 3.  LS: -0.22593, Bayesian: -0.22542 (Bayesian more accurate)
-Dataset 4.  LS: -0.11956, Bayesian: -0.11465 (Bayesian more accurate)
-Dataset 5.  LS: 1.47015, Bayesian: 1.46882 (Bayesian more accurate)
-Dataset 6.  LS: -0.80645, Bayesian: -0.80766 (LS more accurate)
-Dataset 7.  LS: -0.40028, Bayesian: -0.39992 (Bayesian more accurate)
-Dataset 8.  LS: 0.22548, Bayesian: 0.22538 (Bayesian more accurate)
-Dataset 9.  LS: -0.56589, Bayesian: -0.56771 (LS more accurate)
-Dataset 10.  LS: 0.00039, Bayesian: 0.00468 (LS more accurate)
-Dataset 11.  LS: 0.21691, Bayesian: 0.21854 (LS more accurate)
-Dataset 12.  LS: -0.14829, Bayesian: -0.14565 (Bayesian more accurate)
-Dataset 13.  LS: -0.18566, Bayesian: -0.18351 (Bayesian more accurate)
-Dataset 14.  LS: -0.41073, Bayesian: -0.41028 (Bayesian more accurate)
-Dataset 15.  LS: 0.22798, Bayesian: 0.22986 (LS more accurate)
-Dataset 16.  LS: 0.25266, Bayesian: 0.24976 (Bayesian more accurate)
-Dataset 17.  LS: -0.35683, Bayesian: -0.35616 (Bayesian more accurate)
-Dataset 18.  LS: 0.20721, Bayesian: 0.20923 (LS more accurate)
-Dataset 19.  LS: -0.47126, Bayesian: -0.46361 (Bayesian more accurate)
-
-Bayesian more accurate in 12/20 datasets.
-</pre>
-</div>
-</div>
-
-</div>
-
-</div>
-
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>We can see that the Bayesian approach is occasionally, but not compellingly more accurate than the LS approach.</p>
-
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Summary">Summary<a class="anchor-link" href="#Summary">¶</a></h2><p>This Appendix has shown that population means can be estimated not only using the typical LS approach (i.e. the sample mean), but also using at least two different Bayesian approaches. Results show that Bayesian estimates are slightly more accurate than LS estimates for some datasets, but overall that there is not much difference between Bayesian and LS results. However, this is a very simple case of Bayesian inference, with a very simple data model. Subsequent Appendices and the main paper show that Bayesian and LS accuracies diverge as the data model becomes increasingly complex.</p>
+<h1 id="Summary">Summary<a class="anchor-link" href="#Summary">¶</a></h1><p>These results show that:</p>
+<ul>
+<li>Using a vague prior (prior=1) for Baysian IK produces poor results relative to LS-IK results.</li>
+<li>Using the LS-IK solution to inform Bayesian priors (prior=2) provides marginal-to-no accuracy improvement. </li>
+<li>Using highly informative priors (prior=3) yields highly accurate Bayesian IK results; however, since the true solutions are unknown in practice (if they were, IK wouldn't be necessary), this approach is irrelevant to real (non-simulated) IK problems.</li>
+</ul>
+<p>In summary, Bayesian IK accuracy is directly related to the information content of the priors. Using an LS-informed prior is not expected to yield accuracy improvements.</p>
 
 </div>
 </div>
