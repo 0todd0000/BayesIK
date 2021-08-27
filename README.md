@@ -14,7 +14,9 @@ ____
 
 ⚠️ **NOTE!!!**
 
-A major update was made to this repository in July 2021 --- in response to Pohl et al. (2021) --- to correct errors in both the repository and the original paper (Pataky et al. 2019). The errors are summarized in Pataky et al. (2021). 
+A major update was made to this repository in July 2021 --- in response to Pohl et al. (2021) --- to correct errors in both the repository and the original paper (Pataky et al. 2019). The errors are summarized in a Corrigendum article (Pataky et al. 2021). A preprint version of this article is available in this repository (**Corrigendum.pdf**).
+
+<br>
 
 Major repository changes include:
 
@@ -30,8 +32,6 @@ List of Terms:
 
 * *B-IK* &nbsp; = &nbsp; Bayesian inverse kinematics
 * *LS-IK* &nbsp;  = &nbsp; Least-squares inverse kinematics
- 
-
 
 
 
@@ -51,7 +51,7 @@ Pataky TC, Vanrenterghem J, Robinson MA (2019). [Bayesian inverse kinematics vs.
 
 Pataky TC, Vanrenterghem J, Robinson MA (2021). Corrigendum to: Bayesian inverse kinematics vs. least-squares inverse kinematics in estimates of planar postures and rotations in the absence of soft tissue artifact. *Journal of Biomechanics*, *in press*.
 
-Pohl AJ, Schofield MR, Ferber R (2021). [Comparing the performance of Bayesian and least-squares approaches for inverse kinematics problems](https://doi.org/10.1016/j.jbiomech.2021.110597). *Journal of Biomechanics*, *in press*.
+Pohl AJ, Schofield MR, Ferber R (2021). [Comparing the performance of Bayesian and least-squares approaches for inverse kinematics problems](https://doi.org/10.1016/j.jbiomech.2021.110597). *Journal of Biomechanics* 126: 110597.
 
 
 
